@@ -1,0 +1,16 @@
+<?php
+
+use App\Http\Controllers\LogController;
+use App\Http\Controllers\PassController;
+use App\Http\Controllers\ScannerController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [ScannerController::class, 'index'])->name('scanner.index');
+Route::post('/scan', [ScannerController::class, 'scan'])->name('scanner.scan');
+
+Route::get('/passes', [PassController::class, 'index'])->name('passes.index');
+Route::post('/passes/register', [PassController::class, 'register'])->name('passes.register');
+Route::get('/passes/{pass}', [PassController::class, 'show'])->name('passes.show');
+
+Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+Route::get('/logs/export', [LogController::class, 'export'])->name('logs.export');

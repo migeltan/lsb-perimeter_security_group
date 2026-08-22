@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Building extends Model
+{
+    protected $fillable = ['code', 'name', 'color_name', 'color_hex'];
+
+    public function passes(): HasMany
+    {
+        return $this->hasMany(VisitorPass::class);
+    }
+
+    public function scanLogs(): HasMany
+    {
+        return $this->hasMany(ScanLog::class, 'scanned_building_id');
+    }
+}
