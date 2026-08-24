@@ -2,25 +2,28 @@
 @section('title', 'Pass Preview')
 
 @section('content')
-<div class="flex justify-center">
-    <div class="space-y-4">
-        <div id="printablePassArea" class="relative w-[300px] h-[500px] rounded-xl shadow-xl overflow-hidden border-2 border-slate-300"
-             style="background-image:url('{{ asset($pass->building->template_image) }}'); background-size:cover; background-position:center;">
+<div class="flex flex-col items-center gap-4">
+    <p class="eyebrow-label">House of Representatives &middot; Visitor pass</p>
+    <div class="flex justify-center">
+        <div class="space-y-4">
+            <div id="printablePassArea" class="pass-preview-card relative w-[300px] h-[500px] rounded-xl overflow-hidden"
+                 style="background-image:url('{{ asset($pass->building->template_image) }}'); background-size:cover; background-position:center;">
 
-            <!-- QR overlay - adjust top/left % if misaligned with your template's dashed box -->
-            <div class="absolute left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-lg" style="top:44%;">
-                <div id="qrCodeContainer"></div>
+                <!-- QR overlay - adjust top/left % if misaligned with your template's dashed box -->
+                <div class="absolute left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-lg" style="top:44%;">
+                    <div id="qrCodeContainer"></div>
+                </div>
+
+                <!-- Pass number overlay -->
+                <div class="absolute left-1/2 -translate-x-1/2 text-white font-black font-mono drop-shadow-md" style="top:72%; font-size:2.5rem;">
+                    {{ $pass->pass_number }}
+                </div>
             </div>
 
-            <!-- Pass number overlay -->
-            <div class="absolute left-1/2 -translate-x-1/2 text-white font-black font-mono drop-shadow-md" style="top:72%; font-size:2.5rem;">
-                {{ $pass->pass_number }}
+            <div class="flex gap-2">
+                <button onclick="window.print()" class="flex-1 btn-govt-primary font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-print"></i> Print</button>
+                <a href="{{ route('passes.index') }}" class="flex-1 btn-govt-ghost font-bold py-2 rounded-xl text-xs text-center">Back</a>
             </div>
-        </div>
-
-        <div class="flex gap-2">
-            <button onclick="window.print()" class="flex-1 bg-slate-900 text-white font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-print"></i> Print</button>
-            <a href="{{ route('passes.index') }}" class="flex-1 bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs text-center">Back</a>
         </div>
     </div>
 </div>

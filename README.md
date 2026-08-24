@@ -112,4 +112,5 @@ php artisan migrate       # apply database schema changes
 php artisan db:seed       # populate/update buildings + passes
 php artisan optimize:clear # clear cached config/routes/views (fixes weird stale behavior)
 php artisan tinker        # interactive PHP shell to poke at the database directly
+php artisan serve          #see the webpage
 ```
