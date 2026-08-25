@@ -2,12 +2,23 @@
 @section('title', 'Visitor Pass Management')
 
 @section('content')
-<div class="card-govt p-5 shadow-sm flex flex-wrap justify-between items-center gap-4">
-    <div>
-        <h2 class="text-lg font-bold text-slate-800">Visitor pass registry</h2>
-        <p class="text-xs text-slate-500">5 passes per building — assign a visitor to issue and print.</p>
+<div class="hero-govt flex items-center gap-5">
+    <div class="hero-logo-badge hidden sm:flex">
+        <img src="{{ asset('images/lsb-icon.png') }}" alt="">
     </div>
-    <button onclick="document.getElementById('registerModal').classList.remove('hidden')" class="btn-govt-gold px-4 py-2 rounded-xl text-xs">
+    <div>
+        <p class="eyebrow">Internal Security Group &middot; Pass registry</p>
+        <h1>Visitor Pass Management</h1>
+        <p class="lead">5 passes per building — assign a visitor to issue and print a badge.</p>
+    </div>
+</div>
+
+<div class="card-govt card-ribbon p-5 shadow-sm flex flex-wrap justify-between items-center gap-4" style="--ribbon-color: var(--brand-blue)">
+    <div>
+        <span class="tag-pill tag-pill-blue">Registry</span>
+        <h2 class="text-lg font-bold text-slate-800 mt-1">Visitor pass registry</h2>
+    </div>
+    <button onclick="document.getElementById('registerModal').classList.remove('hidden')" class="btn-govt-cta px-4 py-2 text-xs">
         <i class="fa-solid fa-user-plus"></i> Register visitor &amp; issue pass
     </button>
 </div>
@@ -81,7 +92,7 @@
             </div>
             <div class="pt-2 flex justify-end gap-2">
                 <button type="button" onclick="document.getElementById('registerModal').classList.add('hidden')" class="px-4 py-2 rounded-lg btn-govt-ghost">Cancel</button>
-                <button type="submit" class="px-4 py-2 rounded-lg btn-govt-gold">Assign &amp; issue</button>
+                <button type="submit" class="px-4 py-2 rounded-lg btn-govt-cta">Assign &amp; issue</button>
             </div>
         </form>
     </div>

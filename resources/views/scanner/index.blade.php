@@ -2,7 +2,18 @@
 @section('title', 'Scanner Terminal')
 
 @section('content')
-<div class="card-govt p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+<div class="hero-govt flex items-center gap-5">
+    <div class="hero-logo-badge hidden sm:flex">
+        <img src="{{ asset('images/lsb-icon.png') }}" alt="">
+    </div>
+    <div>
+        <p class="eyebrow">Internal Security Group &middot; Scanner terminal</p>
+        <h1>Visitor Access Scanner</h1>
+        <p class="lead">Scan a visitor's QR pass — or enter its code manually — to verify building authorization in real time.</p>
+    </div>
+</div>
+
+<div class="card-govt card-ribbon p-4 shadow-sm flex flex-wrap items-center justify-between gap-4" style="--ribbon-color: var(--brand-gold)">
     <div>
         <label class="eyebrow-label block mb-1">Guard station location</label>
         <select id="scannerBuildingId" class="font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2">
@@ -13,7 +24,7 @@
     </div>
 
     <div class="quick-scan-panel flex items-center gap-2 p-2.5">
-        <span class="text-xs font-semibold" style="color: var(--seal-gold);"><i class="fa-solid fa-bolt"></i> Fast test scan:</span>
+        <span class="text-xs font-semibold" style="color: var(--brand-gold-dark);"><i class="fa-solid fa-bolt"></i> Fast test scan:</span>
         <select id="quickScanSelect" class="text-xs bg-white border border-slate-300 rounded-md px-2 py-1 font-mono">
             <option value="">Select a pass...</option>
             @foreach ($passes as $p)
@@ -25,9 +36,12 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <div class="lg:col-span-5 card-govt p-5 shadow-sm space-y-4">
+    <div class="lg:col-span-5 card-govt card-ribbon p-5 shadow-sm space-y-4" style="--ribbon-color: var(--brand-blue)">
         <div class="flex justify-between items-center">
-            <h2 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-camera text-slate-500"></i> Live scanner feed</h2>
+            <div>
+                <span class="tag-pill tag-pill-blue">Live feed</span>
+                <h2 class="font-bold text-slate-800 text-base mt-1"><i class="fa-solid fa-camera text-slate-500"></i> Live scanner feed</h2>
+            </div>
             <button onclick="toggleCamera()" id="toggleCamBtn" class="text-xs btn-govt-primary px-3 py-1.5 rounded-lg">
                 <i class="fa-solid fa-power-off"></i> Start webcam
             </button>
@@ -46,11 +60,12 @@
     </div>
 
     <div class="lg:col-span-7">
-        <div id="resultCard" class="card-govt p-6 shadow-sm min-h-[360px] flex flex-col justify-between">
+        <div id="resultCard" class="card-govt card-ribbon p-6 shadow-sm min-h-[360px] flex flex-col justify-between" style="--ribbon-color: var(--brand-red)">
             <div id="resultIdle" class="py-12 flex flex-col items-center justify-center text-center space-y-3">
                 <div class="w-20 h-20 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center text-3xl">
                     <i class="fa-solid fa-id-badge"></i>
                 </div>
+                <span class="tag-pill tag-pill-red">Scan result</span>
                 <h3 class="text-lg font-bold text-slate-700">Awaiting pass scan</h3>
             </div>
 

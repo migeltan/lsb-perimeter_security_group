@@ -1,12 +1,11 @@
 /* ==========================================================================
-   THEME — House of Representatives / Internal Security Group
+   THEME — House of Representatives / Internal Security Group  (v2)
    resources/css/theme-govt.css
 
-   Ported from the reference "SMART" portal (theme-smart.css) so this app
-   shares the same navy + gold, serif-heading look. Loaded alongside
-   Tailwind (CDN) in layouts/app.blade.php — Tailwind still handles layout
-   utilities (flex/grid/spacing); this file owns color, type, and the
-   custom components (navbar, cards, badges, buttons, table, pass cards).
+   v2 rebuilds the shell as a light/white portal matching the SMART
+   reference (hero banner, ribboned choice cards, red CTAs) instead of a
+   recolored dark scanner. Brand blue/red/gold below are sampled directly
+   from the LSB/SMART logo so ribbons and buttons match the mark exactly.
    ========================================================================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap");
@@ -22,6 +21,14 @@
   --ink: #1c1f26;
   --ink-muted: #5b6270;
   --hairline: #d9dce1;
+
+  /* Sampled from the LSB/SMART logo */
+  --brand-blue: #235aa5;
+  --brand-blue-dark: #1a4680;
+  --brand-red: #f63a45;
+  --brand-red-dark: #d4222d;
+  --brand-gold: #ffc91a;
+  --brand-gold-dark: #caa000;
 
   --status-authorized: #276749;
   --status-authorized-bg: #dbebe2;
@@ -49,8 +56,6 @@ h1, h2, h3, .display-heading {
   letter-spacing: -0.01em;
 }
 
-/* Small uppercase micro-labels are the ONE place caps stay — eyebrows,
-   badges, table headers — everything else reads in normal sentence case. */
 .eyebrow-label {
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -60,84 +65,165 @@ h1, h2, h3, .display-heading {
 }
 
 /* --------------------------------------------------------------------
-   Navbar / header
+   Navbar — single row, navy, logo + brand text left, links right
    -------------------------------------------------------------------- */
 .navbar-govt {
   background-color: var(--navy-deep);
-  border-bottom: 3px solid var(--seal-gold);
+  border-bottom: 3px solid var(--brand-gold);
   color: #fff;
 }
 
 .navbar-govt .brand-logo {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #fff;
-  color: var(--navy-deep);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Source Serif 4", serif;
-  font-weight: 700;
-  font-size: 0.85rem;
   flex-shrink: 0;
-  border: 2px solid var(--seal-gold);
-  padding: 6px;
+  padding: 5px;
   overflow: hidden;
 }
-
 .navbar-govt .brand-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-
-.navbar-govt .brand-eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.72rem;
-  color: var(--seal-gold);
-  font-weight: 600;
-}
-
 .navbar-govt .brand-title {
   font-family: "Source Serif 4", serif;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   color: #fff;
-  margin: 0.1rem 0 0;
+  line-height: 1.2;
 }
 
-.navbar-nav-govt {
-  background-color: rgba(0, 0, 0, 0.18);
-}
-
-.nav-pill {
-  padding: 0.55rem 1rem;
-  border-radius: 8px;
+.nav-link-govt {
   font-weight: 600;
   font-size: 0.88rem;
   color: #c9d4e6;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  padding: 0.4rem 0.15rem;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
-
-.nav-pill:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+.nav-link-govt:hover { color: #fff; }
+.nav-link-govt.is-active {
   color: #fff;
-}
-
-.nav-pill.is-active {
-  background-color: var(--seal-gold);
-  color: var(--navy-deep);
+  border-bottom-color: var(--brand-gold);
 }
 
 /* --------------------------------------------------------------------
-   Cards
+   Hero banner
+   -------------------------------------------------------------------- */
+.hero-govt {
+  background: linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 100%);
+  color: #fff;
+  border-radius: 10px;
+  padding: 2.5rem 2.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-govt::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 200px;
+  height: 200px;
+  border: 2px solid rgba(255, 201, 26, 0.3);
+  border-radius: 50%;
+}
+.hero-govt::before {
+  content: "";
+  position: absolute;
+  right: 40px;
+  bottom: -70px;
+  width: 0;
+  height: 0;
+  border-left: 70px solid transparent;
+  border-bottom: 140px solid rgba(246, 58, 69, 0.18);
+  transform: rotate(15deg);
+}
+.hero-govt .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  color: var(--brand-gold);
+  font-weight: 700;
+}
+.hero-govt h1 {
+  color: #fff;
+  font-size: 1.9rem;
+  margin: 0.4rem 0 0.6rem;
+}
+.hero-govt p.lead {
+  color: #c9d4e6;
+  max-width: 640px;
+  font-size: 0.94rem;
+  position: relative;
+}
+.hero-govt .hero-logo-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fff;
+  padding: 8px;
+  flex-shrink: 0;
+}
+.hero-govt .hero-logo-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* --------------------------------------------------------------------
+   Ribboned section cards (the "choice card" language from the reference)
+   Usage: <div class="card-govt card-ribbon" style="--ribbon-color: var(--brand-blue)">
    -------------------------------------------------------------------- */
 .card-govt {
   background: var(--surface);
   border: 1px solid var(--hairline);
-  border-radius: 12px;
+  border-radius: 10px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card-ribbon { position: relative; overflow: hidden; }
+.card-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 42px 42px 0;
+  border-color: transparent var(--ribbon-color, var(--brand-blue)) transparent transparent;
+}
+
+.card-lift:hover {
+  border-color: var(--navy-light);
+  transform: translateY(-2px);
+}
+
+.tag-pill {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.28em 0.75em;
+  border-radius: 999px;
+}
+.tag-pill-red  { background: #fde3e4; color: var(--brand-red-dark); }
+.tag-pill-blue { background: #dce7f8; color: var(--brand-blue-dark); }
+.tag-pill-gold { background: #fff3c4; color: var(--brand-gold-dark); }
+
+.card-index {
+  font-family: "Source Serif 4", serif;
+  font-size: 0.82rem;
+  color: var(--seal-gold);
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 /* --------------------------------------------------------------------
@@ -150,10 +236,7 @@ h1, h2, h3, .display-heading {
   font-weight: 600;
   transition: background-color 0.15s ease;
 }
-.btn-govt-primary:hover {
-  background-color: var(--navy);
-  color: #fff;
-}
+.btn-govt-primary:hover { background-color: var(--navy); color: #fff; }
 
 .btn-govt-outline {
   border: 1px solid var(--navy-deep);
@@ -162,21 +245,26 @@ h1, h2, h3, .display-heading {
   font-weight: 600;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
-.btn-govt-outline:hover {
-  background-color: var(--navy-deep);
-  color: #fff;
-}
+.btn-govt-outline:hover { background-color: var(--navy-deep); color: #fff; }
 
-.btn-govt-gold {
-  background-color: var(--seal-gold);
-  border: 1px solid var(--seal-gold);
+.btn-govt-cta {
+  background-color: var(--brand-red);
+  border: 1px solid var(--brand-red);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
+  border-radius: 8px;
   transition: background-color 0.15s ease;
 }
-.btn-govt-gold:hover {
-  background-color: #8c6c21;
+.btn-govt-cta:hover { background-color: var(--brand-red-dark); }
+
+.btn-govt-gold {
+  background-color: var(--brand-gold);
+  border: 1px solid var(--brand-gold);
+  color: var(--navy-deep);
+  font-weight: 700;
+  transition: background-color 0.15s ease;
 }
+.btn-govt-gold:hover { background-color: var(--brand-gold-dark); }
 
 .btn-govt-ghost {
   background-color: #eef1f5;
@@ -184,9 +272,7 @@ h1, h2, h3, .display-heading {
   color: var(--ink);
   font-weight: 600;
 }
-.btn-govt-ghost:hover {
-  background-color: #e3e7ec;
-}
+.btn-govt-ghost:hover { background-color: #e3e7ec; }
 
 .btn-govt-success {
   background-color: var(--status-authorized);
@@ -195,9 +281,7 @@ h1, h2, h3, .display-heading {
   font-weight: 600;
   transition: background-color 0.15s ease;
 }
-.btn-govt-success:hover {
-  background-color: #1e5138;
-}
+.btn-govt-success:hover { background-color: #1e5138; }
 
 /* --------------------------------------------------------------------
    Status badges
@@ -218,7 +302,7 @@ h1, h2, h3, .display-heading {
 .badge-info        { background: var(--status-info-bg);      color: var(--status-info); }
 
 /* --------------------------------------------------------------------
-   Filter pills (building filters on Passes / result filter on Logs)
+   Filter pills
    -------------------------------------------------------------------- */
 .pill-filter {
   padding: 0.45rem 0.9rem;
@@ -231,10 +315,7 @@ h1, h2, h3, .display-heading {
   white-space: nowrap;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.pill-filter:hover {
-  border-color: var(--navy-light);
-  color: var(--navy-deep);
-}
+.pill-filter:hover { border-color: var(--navy-light); color: var(--navy-deep); }
 .pill-filter.is-active {
   background: var(--navy-deep);
   border-color: var(--navy-deep);
@@ -242,21 +323,16 @@ h1, h2, h3, .display-heading {
 }
 
 /* --------------------------------------------------------------------
-   Scanner
+   Scanner — the live-feed box stays dark for contrast/legibility even
+   inside the light shell, same way a camera viewfinder would.
    -------------------------------------------------------------------- */
 .scanner-feed {
   background: var(--navy-deep);
   border: 2px solid var(--navy);
   border-radius: 12px;
 }
-
-.scanner-feed .scanner-placeholder {
-  color: #93a5c4;
-}
-
-.scanner-feed .scanner-placeholder i {
-  color: var(--navy-light);
-}
+.scanner-feed .scanner-placeholder { color: #93a5c4; }
+.scanner-feed .scanner-placeholder i { color: var(--navy-light); }
 
 .status-banner {
   border-radius: 10px;
@@ -268,7 +344,6 @@ h1, h2, h3, .display-heading {
 }
 .status-banner.is-authorized { background: var(--status-authorized); }
 .status-banner.is-denied { background: var(--status-denied); }
-
 .status-banner .status-title {
   font-family: "Source Serif 4", serif;
   font-weight: 700;
@@ -293,10 +368,9 @@ h1, h2, h3, .display-heading {
   font-weight: 600;
 }
 
-/* Quick test scan panel */
 .quick-scan-panel {
-  background: var(--seal-gold-light);
-  border: 1px solid #e3cd97;
+  background: #fff3c4;
+  border: 1px solid #f3dc8a;
   border-radius: 12px;
 }
 
@@ -306,17 +380,13 @@ h1, h2, h3, .display-heading {
 .pass-card {
   background: var(--surface);
   border: 1px solid var(--hairline);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-
-.pass-card .pass-card-header {
-  border-bottom: 1px solid var(--hairline);
-}
-
+.pass-card .pass-card-header { border-bottom: 1px solid var(--hairline); }
 .pass-card .pass-card-eyebrow {
   font-size: 0.68rem;
   font-weight: 700;
@@ -324,34 +394,25 @@ h1, h2, h3, .display-heading {
   text-transform: uppercase;
   color: var(--seal-gold);
 }
-
 .pass-card .pass-card-building {
   font-family: "Source Serif 4", serif;
   font-weight: 700;
   color: var(--navy-deep);
   font-size: 1.05rem;
 }
-
-.pass-card .pass-card-footer {
-  color: #fff;
-}
+.pass-card .pass-card-footer { color: #fff; }
 
 /* --------------------------------------------------------------------
    Table (Logs)
    -------------------------------------------------------------------- */
-.table-govt thead tr {
-  background: var(--navy-deep);
-  color: #fff;
-}
+.table-govt thead tr { background: var(--navy-deep); color: #fff; }
 .table-govt thead th {
   font-weight: 600;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.table-govt tbody tr:hover {
-  background: #f5f7fa;
-}
+.table-govt tbody tr:hover { background: #f5f7fa; }
 
 /* --------------------------------------------------------------------
    Alerts / session banners
@@ -366,17 +427,9 @@ h1, h2, h3, .display-heading {
 /* --------------------------------------------------------------------
    Modal (Register Visitor)
    -------------------------------------------------------------------- */
-.modal-govt-panel {
-  background: var(--surface);
-  border-radius: 14px;
-}
-.modal-govt-panel h3 {
-  font-size: 1.1rem;
-}
-.modal-govt-panel label {
-  color: var(--ink);
-  font-weight: 600;
-}
+.modal-govt-panel { background: var(--surface); border-radius: 14px; }
+.modal-govt-panel h3 { font-size: 1.1rem; }
+.modal-govt-panel label { color: var(--ink); font-weight: 600; }
 .modal-govt-panel input,
 .modal-govt-panel select {
   border: 1px solid var(--hairline);

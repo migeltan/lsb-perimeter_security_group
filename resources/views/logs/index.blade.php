@@ -2,8 +2,22 @@
 @section('title', 'Audit Logs')
 
 @section('content')
-<div class="card-govt p-5 shadow-sm flex flex-wrap justify-between items-center gap-4">
-    <h2 class="text-lg font-bold text-slate-800">Centralized visitor access logs</h2>
+<div class="hero-govt flex items-center gap-5">
+    <div class="hero-logo-badge hidden sm:flex">
+        <img src="{{ asset('images/lsb-icon.png') }}" alt="">
+    </div>
+    <div>
+        <p class="eyebrow">Internal Security Group &middot; Audit trail</p>
+        <h1>Centralized Visitor Access Logs</h1>
+        <p class="lead">Every scan event, authorized or denied, recorded with timestamp, pass, and reason.</p>
+    </div>
+</div>
+
+<div class="card-govt card-ribbon p-5 shadow-sm flex flex-wrap justify-between items-center gap-4" style="--ribbon-color: var(--brand-gold)">
+    <div>
+        <span class="tag-pill tag-pill-gold">Export</span>
+        <h2 class="text-lg font-bold text-slate-800 mt-1">Log records</h2>
+    </div>
     <a href="{{ route('logs.export') }}" class="btn-govt-success font-bold px-3.5 py-2 rounded-xl text-xs">
         <i class="fa-solid fa-file-csv"></i> Export CSV
     </a>
