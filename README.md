@@ -20,8 +20,6 @@ This prototype implements the paper's core proposed mechanism: each visitor pass
 
 ## Tech Stack
 
-## Tech Stack
-
 - **Laravel 11** (PHP 8.4) — backend framework, routing, database ORM
 - **MySQL** (via XAMPP) — persistent storage for buildings, passes, and scan logs
 - **Blade** — server-rendered views (no separate frontend framework)
