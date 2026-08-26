@@ -7,9 +7,9 @@
         <img src="{{ asset('images/lsb-icon.png') }}" alt="">
     </div>
     <div>
-        <p class="eyebrow">Internal Security Group &middot; Scanner terminal</p>
+        <p class="eyebrow">Perimeter Security Group &middot; Scanner terminal</p>
         <h1>Visitor Access Scanner</h1>
-        <p class="lead">Scan a visitor's QR pass — or enter its code manually — to verify building authorization in real time.</p>
+        <p class="lead">Scan a visitor's QR pass - or enter its code manually - to verify building authorization in real time.</p>
     </div>
 </div>
 
@@ -94,6 +94,8 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 let html5QrcodeScanner = null;
 let isCameraActive = false;
+let lastScannedToken = null;
+let scanCooldownActive = false;
 
 function playAudioFeedback(authorized) {
     try {
@@ -178,7 +180,20 @@ function toggleCamera() {
         html5QrcodeScanner.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: { width: 220, height: 220 } },
-            (decodedText) => processScanToken(decodedText),
+            (decodedText) => {
+                if (scanCooldownActive) return;
+                if (decodedText === lastScannedToken) return;
+
+                lastScannedToken = decodedText;
+                scanCooldownActive = true;
+
+                processScanToken(decodedText);
+
+                setTimeout(() => {
+                    scanCooldownActive = false;
+                    lastScannedToken = null;
+                }, 3000);
+            },
             () => {}
         ).then(() => {
             isCameraActive = true;

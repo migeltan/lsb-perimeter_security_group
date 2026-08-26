@@ -7,9 +7,9 @@
         <img src="{{ asset('images/lsb-icon.png') }}" alt="">
     </div>
     <div>
-        <p class="eyebrow">Internal Security Group &middot; Pass registry</p>
+        <p class="eyebrow">Perimeter Security Group &middot; Pass registry</p>
         <h1>Visitor Pass Management</h1>
-        <p class="lead">5 passes per building — assign a visitor to issue and print a badge.</p>
+        <p class="lead">5 passes per building - assign a visitor to issue and print a badge.</p>
     </div>
 </div>
 

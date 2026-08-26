@@ -15,9 +15,9 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="brand-logo">
-                    <img src="{{ asset('images/lsb-icon.png') }}" alt="House of Representatives — Internal Security Group">
+                    <img src="{{ asset('images/lsb-icon.png') }}" alt="House of Representatives - Perimeter Security Group">
                 </div>
-                <span class="brand-title">House of Representatives &mdash; Internal Security Group</span>
+                <span class="brand-title">House of Representatives &dash; Perimeter Security Group</span>
             </div>
             <nav class="flex gap-5">
                 <a href="{{ route('scanner.index') }}" class="nav-link-govt {{ request()->routeIs('scanner.*') ? 'is-active' : '' }}">Scanner</a>

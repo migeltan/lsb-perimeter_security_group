@@ -7,7 +7,7 @@
         <img src="{{ asset('images/lsb-icon.png') }}" alt="">
     </div>
     <div>
-        <p class="eyebrow">Internal Security Group &middot; Audit trail</p>
+        <p class="eyebrow">Perimeter Security Group &middot; Audit trail</p>
         <h1>Centralized Visitor Access Logs</h1>
         <p class="lead">Every scan event, authorized or denied, recorded with timestamp, pass, and reason.</p>
     </div>
