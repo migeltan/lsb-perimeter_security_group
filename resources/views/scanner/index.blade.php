@@ -1,91 +1,95 @@
+{{-- resources/views/scanner/index.blade.php --}}
 @extends('layouts.app')
 @section('title', 'Scanner Terminal')
 
 @section('content')
-<div class="hero-govt flex items-center gap-5">
-    <div class="hero-logo-badge hidden sm:flex">
-        <img src="{{ asset('images/lsb-icon.png') }}" alt="">
-    </div>
-    <div>
-        <p class="eyebrow">Perimeter Security Group &middot; Scanner terminal</p>
-        <h1>Visitor Access Scanner</h1>
-        <p class="lead">Scan a visitor's QR pass - or enter its code manually - to verify building authorization in real time.</p>
-    </div>
-</div>
+<div class="hero-govt">
+    <div class="sunburst-red" aria-hidden="true"></div>
 
-<div class="card-govt card-ribbon p-4 shadow-sm flex flex-wrap items-center justify-between gap-4" style="--ribbon-color: var(--brand-gold)">
-    <div>
-        <label class="eyebrow-label block mb-1">Guard station location</label>
-        <select id="scannerBuildingId" class="font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2">
-            @foreach ($buildings as $b)
-                <option value="{{ $b->id }}">{{ $b->name }} Entrance</option>
-            @endforeach
-        </select>
-    </div>
+    <div class="hero-frame">
+        <div class="hero-frame-rattan" aria-hidden="true"></div>
 
-    <div class="quick-scan-panel flex items-center gap-2 p-2.5">
-        <span class="text-xs font-semibold" style="color: var(--brand-gold-dark);"><i class="fa-solid fa-bolt"></i> Fast test scan:</span>
-        <select id="quickScanSelect" class="text-xs bg-white border border-slate-300 rounded-md px-2 py-1 font-mono">
-            <option value="">Select a pass...</option>
-            @foreach ($passes as $p)
-                <option value="{{ $p->qr_token }}">[{{ $p->building->name }}] {{ $p->visitor_name ?: 'Unassigned' }} ({{ $p->pass_number }})</option>
-            @endforeach
-        </select>
-        <button onclick="triggerQuickScan()" class="btn-govt-gold px-3 py-1 rounded-md text-xs">Scan</button>
+        <div class="hero-inner-panel flex items-center gap-5">
+            <div class="hero-logo-badge hidden sm:flex">
+                <img src="{{ asset('images/lsb-icon.png') }}" alt="LSB emblem">
+            </div>
+            <div>
+                <p class="eyebrow">Perimeter Security Group &middot; Scanner Terminal</p>
+                <h1>Visitor Access Scanner</h1>
+                <p class="lead">Scan a visitor's pass to validate the authorized building through this scanner.</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <div class="lg:col-span-5 card-govt card-ribbon p-5 shadow-sm space-y-4" style="--ribbon-color: var(--brand-blue)">
+
+    {{-- Yellow: live feed, tall left column --}}
+    <div class="lg:col-span-6 card-govt card-vivid p-5 shadow-sm space-y-4" style="--ribbon-color: var(--brand-gold)">
         <div class="flex justify-between items-center">
             <div>
                 <span class="tag-pill tag-pill-blue">Live feed</span>
-                <h2 class="font-bold text-slate-800 text-base mt-1"><i class="fa-solid fa-camera text-slate-500"></i> Live scanner feed</h2>
+                <h2 class="card-header-title mt-1"><i class="fa-solid fa-camera"></i> Live scanner feed</h2>
             </div>
             <button onclick="toggleCamera()" id="toggleCamBtn" class="text-xs btn-govt-primary px-3 py-1.5 rounded-lg">
                 <i class="fa-solid fa-power-off"></i> Start webcam
             </button>
         </div>
-        <div class="relative scanner-feed overflow-hidden aspect-square flex items-center justify-center">
-            <div id="reader" class="w-full h-full"></div>
-            <div id="camPlaceholder" class="scanner-placeholder absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <i class="fa-solid fa-qrcode text-5xl mb-3"></i>
-                <p class="text-xs">Click "Start webcam" or use manual input below.</p>
+
+        <div class="scanner-viewport-inset">
+            <div class="relative scanner-feed overflow-hidden aspect-square flex items-center justify-center">
+                <div id="reader" class="w-full h-full"></div>
+                <div id="camPlaceholder" class="scanner-placeholder absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                    <i class="fa-solid fa-camera text-5xl mb-3"></i>
+                    <p class="text-xs">Awaiting camera feed.</p>
+                </div>
             </div>
         </div>
-        <form onsubmit="handleManualScanSubmit(event)" class="flex gap-2 pt-2 border-t border-slate-100">
-            <input type="text" id="manualTokenInput" placeholder="Scan or paste QR token..." class="flex-grow px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono">
-            <button type="submit" class="btn-govt-primary px-4 py-2 rounded-lg text-sm">Validate</button>
-        </form>
     </div>
 
-    <div class="lg:col-span-7">
-        <div id="resultCard" class="card-govt card-ribbon p-6 shadow-sm min-h-[360px] flex flex-col justify-between" style="--ribbon-color: var(--brand-red)">
+    {{-- Right column: Red (station location) stacked over Blue (result) --}}
+    <div class="lg:col-span-6 flex flex-col gap-6">
+
+        <div class="card-govt card-vivid p-5 shadow-sm" style="--ribbon-color: var(--brand-red)">
+            <label class="card-header-title flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-building-circle-check"></i> Personnel Station Location
+            </label>
+            <select id="scannerBuildingId" class="scanner-select w-full rounded-2xl px-4 py-3 font-bold">
+                @foreach ($buildings as $b)
+                    <option value="{{ $b->id }}">{{ $b->name }} Entrance</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div id="resultCard" class="card-govt card-vivid p-5 shadow-sm flex-grow flex flex-col gap-4" style="--ribbon-color: var(--brand-blue)">
             <div id="resultIdle" class="py-12 flex flex-col items-center justify-center text-center space-y-3">
-                <div class="w-20 h-20 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center text-3xl">
-                    <i class="fa-solid fa-id-badge"></i>
+                <div class="w-20 h-20 bg-white text-slate-400 rounded-full flex items-center justify-center text-3xl">
+                    <i class="fa-solid fa-id-card"></i>
                 </div>
                 <span class="tag-pill tag-pill-red">Scan result</span>
-                <h3 class="text-lg font-bold text-slate-700">Awaiting pass scan</h3>
+                <h3 class="text-lg font-bold text-white">Awaiting pass scan</h3>
             </div>
 
-            <div id="resultActive" class="hidden space-y-5">
-                <div id="statusHeader" class="status-banner">
+            <div id="resultActive" class="hidden flex flex-col gap-4">
+                <div id="statusHeader" class="status-banner-card">
                     <div>
                         <div id="statusText" class="status-title"></div>
-                        <div id="statusSubtitle" class="text-xs text-white/90"></div>
+                        <div id="statusSubtitle" class="status-subtitle"></div>
                     </div>
-                    <div id="scanTimestamp" class="text-sm font-bold font-mono"></div>
+                    <div id="scanTimestamp" class="status-timestamp"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm">
-                    <div><span class="eyebrow-label" style="color: var(--ink-muted);">Visitor</span><div id="resVisitorName" class="font-bold"></div></div>
-                    <div><span class="eyebrow-label" style="color: var(--ink-muted);">Pass #</span><div id="resPassNum" class="font-bold font-mono"></div></div>
-                    <div><span class="eyebrow-label" style="color: var(--ink-muted);">Authorized bldg</span><div id="resPassBldg" class="font-bold"></div></div>
-                    <div><span class="eyebrow-label" style="color: var(--ink-muted);">Scanned at</span><div id="resScanLoc" class="font-bold"></div></div>
+
+                <div class="meta-grid-card">
+                    <div><span class="meta-label">Visitor</span><div id="resVisitorName" class="meta-value"></div></div>
+                    <div><span class="meta-label">Pass #</span><div id="resPassNum" class="meta-value font-mono"></div></div>
+                    <div><span class="meta-label">Authorized Bldg.</span><div id="resPassBldg" class="meta-value"></div></div>
+                    <div><span class="meta-label">Scanned At</span><div id="resScanLoc" class="meta-value"></div></div>
                 </div>
-                <div id="securityAdvisory" class="advisory-box"><span id="advisoryText"></span></div>
+
+                <div id="securityAdvisory" class="advisory-card"><span id="advisoryText"></span></div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -146,30 +150,19 @@ function displayScanResultUI(data) {
     const advisoryBox = document.getElementById('securityAdvisory');
 
     if (data.result === 'AUTHORIZED') {
-        header.className = 'status-banner is-authorized';
+        header.className = 'status-banner-card is-authorized';
         document.getElementById('statusText').innerText = 'Access authorized';
         document.getElementById('statusSubtitle').innerText = 'Visitor authorized for this building';
-        advisoryBox.className = 'advisory-box is-authorized';
+        advisoryBox.className = 'advisory-card is-authorized';
         advisory.innerText = `Confirmed: ${data.visitor_name} holds a valid pass for ${data.scanned_building}.`;
     } else {
-        header.className = 'status-banner is-denied';
+        header.className = 'status-banner-card is-denied';
         document.getElementById('statusText').innerText = 'Denied: ' + data.result.charAt(0) + data.result.slice(1).toLowerCase();
         document.getElementById('statusSubtitle').innerText = 'Security alert';
-        advisoryBox.className = 'advisory-box is-denied';
+        advisoryBox.className = 'advisory-card is-denied';
         advisory.innerText = data.reason;
     }
     playAudioFeedback(data.result === 'AUTHORIZED');
-}
-
-function triggerQuickScan() {
-    const token = document.getElementById('quickScanSelect').value;
-    if (token) processScanToken(token);
-}
-
-function handleManualScanSubmit(e) {
-    e.preventDefault();
-    const input = document.getElementById('manualTokenInput');
-    if (input.value.trim()) { processScanToken(input.value.trim()); input.value = ''; }
 }
 
 function toggleCamera() {
@@ -183,12 +176,9 @@ function toggleCamera() {
             (decodedText) => {
                 if (scanCooldownActive) return;
                 if (decodedText === lastScannedToken) return;
-
                 lastScannedToken = decodedText;
                 scanCooldownActive = true;
-
                 processScanToken(decodedText);
-
                 setTimeout(() => {
                     scanCooldownActive = false;
                     lastScannedToken = null;

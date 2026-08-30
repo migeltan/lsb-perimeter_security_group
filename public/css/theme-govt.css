@@ -1,452 +1,812 @@
 /* ==========================================================================
-   THEME — House of Representatives / Internal Security Group  (v2)
+   THEME — House of Representatives / Internal Security Group  (v6)
    resources/css/theme-govt.css
 
-   v2 rebuilds the shell as a light/white portal matching the SMART
-   reference (hero banner, ribboned choice cards, red CTAs) instead of a
-   recolored dark scanner. Brand blue/red/gold below are sampled directly
-   from the LSB/SMART logo so ribbons and buttons match the mark exactly.
+   v6 changes:
+   - Added explicit status-color trio per spec: a "chrome" color
+     (--status-authorized / --status-denied, used sparingly for borders/
+     accents), a text color (--status-authorized-text / -denied-text, used
+     for headline copy), and a background tint (--status-authorized-bg /
+     -denied-bg, used on the advisory card). Previously only one shade per
+     status existed, so dark green/red text sat almost unreadable directly
+     against the solid blue card.
+   - #resultCard rebuilt into three explicit white inset panels
+     (.status-banner-card, .meta-grid-card, .advisory-card) instead of a
+     colored status-banner + slate-50 grid sitting loose on the blue
+     background — this was the actual cause of the readability problem in
+     the screenshot, not just a color tweak.
+   - Live feed viewport now sits inside .scanner-viewport-inset, a white
+     rounded frame, matching the "Live Scanner Field" mockup panel; the
+     dark .scanner-feed renders inside it unchanged.
+   - .card-header-title added: shared PT-Serif/bold/white title style for
+     card headers on vivid backgrounds (Live scanner feed / Personnel
+     Station Location), replacing ad hoc text-slate-800 classes that read
+     as near-invisible on colored backgrounds.
+   - .scanner-select added for the building dropdown: solid white,
+     rounded-2xl, bold, with a yellow focus ring per spec.
    ========================================================================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap");
 
 :root {
-  --navy-deep: #0b2545;
-  --navy: #13315c;
-  --navy-light: #1f4e8c;
-  --seal-gold: #a6802a;
-  --seal-gold-light: #f3e6c9;
-  --paper: #f7f7f5;
-  --surface: #ffffff;
-  --ink: #1c1f26;
-  --ink-muted: #5b6270;
-  --hairline: #d9dce1;
+    --navy-deep: #0b2545;
+    --navy: #13315c;
+    --navy-light: #1f4e8c;
+    --seal-gold: #a6802a;
+    --seal-gold-light: #f3e6c9;
+    --eyebrow-gold: #8a6d1d; /* dark gold/gray tone used for eyebrow text on white */
+    --paper: #f7f7f5;
+    --surface: #ffffff;
+    --ink: #1c1f26;
+    --ink-muted: #5b6270;
+    --hairline: #d9dce1;
 
-  /* Sampled from the LSB/SMART logo */
-  --brand-blue: #235aa5;
-  --brand-blue-dark: #1a4680;
-  --brand-red: #f63a45;
-  --brand-red-dark: #d4222d;
-  --brand-gold: #ffc91a;
-  --brand-gold-dark: #caa000;
+    /* Brand primaries — exact spec values */
+    --brand-blue: #235aa6;
+    --brand-blue-dark: #1a4680;
+    --brand-red: #ef3b4c;
+    --brand-red-dark: #d5303f;
+    --brand-gold: #ffc200;
+    --brand-gold-dark: #cc9b00;
 
-  --status-authorized: #276749;
-  --status-authorized-bg: #dbebe2;
-  --status-denied: #a13d2e;
-  --status-denied-bg: #f7dfda;
-  --status-pending: #8a6d1d;
-  --status-pending-bg: #fbf0da;
-  --status-info: #1f4e8c;
-  --status-info-bg: #dce7f8;
+    /* Status colors — chrome / text / background trio per spec */
+    --status-authorized: #276749;
+    --status-authorized-text: #1e5138;
+    --status-authorized-bg: #e8f5e9;
+    --status-denied: #d32f2f;
+    --status-denied-text: #b71c1c;
+    --status-denied-bg: #ffebee;
+    --status-pending: #8a6d1d;
+    --status-pending-bg: #fbf0da;
+    --status-info: #1f4e8c;
+    --status-info-bg: #dce7f8;
 }
 
 /* --------------------------------------------------------------------
    Base
    -------------------------------------------------------------------- */
 body {
-  background-color: var(--paper);
-  color: var(--ink);
-  font-family: "Public Sans", -apple-system, sans-serif;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family:
+        "Lato",
+        "Public Sans",
+        -apple-system,
+        sans-serif;
 }
 
-h1, h2, h3, .display-heading {
-  font-family: "Source Serif 4", Georgia, serif;
-  font-weight: 700;
-  color: var(--navy-deep);
-  letter-spacing: -0.01em;
+h1,
+h2,
+h3,
+.brand-title-group {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+.display-heading {
+    font-family: "PT Serif", "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    color: var(--navy-deep);
+    letter-spacing: -0.01em;
 }
 
 .eyebrow-label {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--seal-gold);
+    text-transform: capitalize;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--eyebrow-gold);
 }
 
 /* --------------------------------------------------------------------
    Navbar — single row, navy, logo + brand text left, links right
    -------------------------------------------------------------------- */
 .navbar-govt {
-  background-color: var(--navy-deep);
-  border-bottom: 3px solid var(--brand-gold);
-  color: #fff;
+    background-color: var(--brand-blue);
+    border-bottom: 5px solid var(--brand-gold);
+    color: #fff;
+    position: relative;
+    overflow: hidden; /* clip the yellow sunburst bleed at the header edge */
+    padding: 0.4rem 0;
 }
 
-.navbar-govt .brand-logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 5px;
-  overflow: hidden;
+.navbar-govt::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.17);
+    -webkit-mask-image: url("/images/rattan-pattern-raw.svg");
+    -webkit-mask-repeat: repeat;
+    -webkit-mask-size: 150px 150px;
+    mask-image: url("/images/rattan-pattern-raw.svg");
+    mask-repeat: repeat;
+    mask-size: 150px 150px;
+    pointer-events: none;
+    z-index: 0;
 }
-.navbar-govt .brand-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.navbar-govt .brand-logo {
+    width: 84px;
+    height: 84px;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    position: relative;
+    z-index: 1;
 }
 .navbar-govt .brand-title {
-  font-family: "Source Serif 4", serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: #fff;
-  line-height: 1.2;
+    font-family:
+        "Engravers Old English MT", "UnifrakturMaguntia", "Source Serif 4",
+        serif;
+    font-size: 2.15rem;
+    font-weight: 400;
+}
+
+.brand-subtitle {
+    font-family: "PT Serif", serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #dfe7f5;
+    text-transform: capitalize;
 }
 
 .nav-link-govt {
-  font-weight: 600;
-  font-size: 0.88rem;
-  color: #c9d4e6;
-  padding: 0.4rem 0.15rem;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s ease, border-color 0.15s ease;
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: #c9d4e6;
+    padding: 0.4rem 0.15rem;
+    border-bottom: 2px solid transparent;
+    transition:
+        color 0.15s ease,
+        border-color 0.15s ease;
 }
-.nav-link-govt:hover { color: #fff; }
+.nav-link-govt:hover {
+    color: #fff;
+}
 .nav-link-govt.is-active {
-  color: #fff;
-  border-bottom-color: var(--brand-gold);
+    color: #fff;
+    border-bottom-color: var(--brand-red);
 }
 
 /* --------------------------------------------------------------------
-   Hero banner
+   Decorative sunbursts — position: absolute only, never fixed, so each
+   scrolls naturally with its positioned parent.
+     .sunburst-gold -> .navbar-govt (top-left, bleeds off left)
+     .sunburst-red  -> .hero-frame  (top-right, bleeds off right)
+     .sunburst-blue -> <main>       (bottom-left, bleeds off left)
+   -------------------------------------------------------------------- */
+.sunburst-gold,
+.sunburst-red,
+.sunburst-blue {
+    position: absolute;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.sunburst-gold {
+    top: -60px;
+    left: -60px;
+    width: 220px;
+    height: 220px;
+    background-image: url("/images/yellow-sun.svg");
+    z-index: 1;
+}
+
+.sunburst-red {
+    top: -110px;
+    right: -110px;
+    width: 380px;
+    height: 380px;
+    background-image: url("/images/red-sun.svg");
+    z-index: 0;
+}
+
+.sunburst-blue {
+    bottom: -140px;
+    left: -140px;
+    width: 300px;
+    height: 300px;
+    background-image: url("/images/blue-sun.svg");
+    opacity: 0.85;
+    z-index: 0;
+}
+
+/* --------------------------------------------------------------------
+   Hero — .hero-frame is the thick Yellow-Blue-Red-Blue-Yellow segmented
+   border; .hero-frame-rattan is a single continuous masked overlay
+   spanning the entire frame so the texture never restarts or shifts tone
+   at a color boundary. .hero-inner-panel is the plain white card inset
+   inside it. Per spec, .sunburst-red is now scoped inside .hero-frame
+   itself (previously .hero-govt) so it extends past the frame's own
+   upper-right border rather than the outer wrapper's.
    -------------------------------------------------------------------- */
 .hero-govt {
-  background: linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 100%);
-  color: #fff;
-  border-radius: 10px;
-  padding: 2.5rem 2.25rem;
-  position: relative;
-  overflow: hidden;
+    position: relative;
 }
-.hero-govt::after {
-  content: "";
-  position: absolute;
-  right: -60px;
-  top: -60px;
-  width: 200px;
-  height: 200px;
-  border: 2px solid rgba(255, 201, 26, 0.3);
-  border-radius: 50%;
-}
-.hero-govt::before {
-  content: "";
-  position: absolute;
-  right: 40px;
-  bottom: -70px;
-  width: 0;
-  height: 0;
-  border-left: 70px solid transparent;
-  border-bottom: 140px solid rgba(246, 58, 69, 0.18);
-  transform: rotate(15deg);
-}
+
 .hero-govt .eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.72rem;
-  color: var(--brand-gold);
-  font-weight: 700;
+    text-transform: capitalize;
+    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    font-weight: 700;
 }
 .hero-govt h1 {
-  color: #fff;
-  font-size: 1.9rem;
-  margin: 0.4rem 0 0.6rem;
+    font-size: 1.9rem;
+    margin: 0.4rem 0 0.6rem;
 }
 .hero-govt p.lead {
-  color: #c9d4e6;
-  max-width: 640px;
-  font-size: 0.94rem;
-  position: relative;
+    max-width: 640px;
+    font-size: 0.94rem;
 }
+
 .hero-govt .hero-logo-badge {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #fff;
-  padding: 8px;
-  flex-shrink: 0;
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 .hero-govt .hero-logo-badge img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.hero-frame {
+    position: relative;
+    z-index: 1;
+    padding: 10px;
+    border-radius: 1.1rem;
+    background-color: var(--brand-gold);
+    overflow: visible; /* let .sunburst-red bleed past the frame's own edge */
+}
+
+.hero-frame::before,
+.hero-frame::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    pointer-events: none;
+    z-index: 1;
+    background-image: linear-gradient(
+        to right,
+        var(--brand-gold) 0%,
+        var(--brand-gold) 5%,
+        var(--brand-blue) 5%,
+        var(--brand-blue) 35%,
+        var(--brand-red) 35%,
+        var(--brand-red) 65%,
+        var(--brand-blue) 65%,
+        var(--brand-blue) 95%,
+        var(--brand-gold) 95%,
+        var(--brand-gold) 100%
+    );
+}
+.hero-frame::before {
+    top: 0;
+    border-radius: 1.1rem 1.1rem 0 0;
+}
+.hero-frame::after {
+    bottom: 0;
+    border-radius: 0 0 1.1rem 1.1rem;
+}
+
+/* Continuous rattan overlay — masked flat rgba(0,0,0,.17) layer covering the
+   whole frame (corners + both strips) in one pass, clipped to the rounded
+   frame shape so it can't bleed past the border radius. */
+.hero-frame-rattan {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 1.1rem;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.17);
+    -webkit-mask-image: url("/images/rattan-pattern-raw.svg");
+    -webkit-mask-repeat: repeat;
+    -webkit-mask-size: 90px 90px;
+    mask-image: url("/images/rattan-pattern-raw.svg");
+    mask-repeat: repeat;
+    mask-size: 90px 90px;
+}
+
+.hero-inner-panel {
+    position: relative;
+    z-index: 3;
+    background: #fff;
+    border-radius: 0.85rem;
+    padding: 1.1rem 1.75rem;
+}
+
+.hero-inner-panel .eyebrow {
+    color: var(--eyebrow-gold);
+}
+.hero-inner-panel h1 {
+    font-family: "PT Serif", "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    color: #000000;
+}
+.hero-inner-panel .lead {
+    color: var(--ink);
 }
 
 /* --------------------------------------------------------------------
-   Ribboned section cards (the "choice card" language from the reference)
-   Usage: <div class="card-govt card-ribbon" style="--ribbon-color: var(--brand-blue)">
+   Ribboned section cards
    -------------------------------------------------------------------- */
 .card-govt {
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: 10px;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease;
 }
 
-.card-ribbon { position: relative; overflow: hidden; }
+.card-ribbon {
+    position: relative;
+    overflow: hidden;
+}
 .card-ribbon::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 42px 42px 0;
-  border-color: transparent var(--ribbon-color, var(--brand-blue)) transparent transparent;
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 42px 42px 0;
+    border-color: transparent var(--ribbon-color, var(--brand-blue)) transparent
+        transparent;
 }
 
 .card-lift:hover {
-  border-color: var(--navy-light);
-  transform: translateY(-2px);
+    border-color: var(--navy-light);
+    transform: translateY(-2px);
 }
 
 .tag-pill {
-  display: inline-block;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0.28em 0.75em;
-  border-radius: 999px;
+    display: inline-block;
+    text-transform: capitalize;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.28em 0.75em;
+    border-radius: 999px;
 }
-.tag-pill-red  { background: #fde3e4; color: var(--brand-red-dark); }
-.tag-pill-blue { background: #dce7f8; color: var(--brand-blue-dark); }
-.tag-pill-gold { background: #fff3c4; color: var(--brand-gold-dark); }
+.tag-pill-red {
+    background: #fde3e4;
+    color: var(--brand-red-dark);
+}
+.tag-pill-blue {
+    background: #dce7f8;
+    color: var(--brand-blue-dark);
+}
+.tag-pill-gold {
+    background: #fff3c4;
+    color: var(--brand-gold-dark);
+}
 
 .card-index {
-  font-family: "Source Serif 4", serif;
-  font-size: 0.82rem;
-  color: var(--seal-gold);
-  font-weight: 600;
-  letter-spacing: 0.06em;
+    font-family: "Source Serif 4", serif;
+    font-size: 0.82rem;
+    color: var(--seal-gold);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+}
+
+/* Shared header title for card headers on vivid backgrounds
+   (Live scanner feed / Personnel Station Location). */
+.card-header-title {
+    font-family: "PT Serif", "Source Serif 4", serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* --------------------------------------------------------------------
    Buttons
    -------------------------------------------------------------------- */
 .btn-govt-primary {
-  background-color: var(--navy-deep);
-  border: 1px solid var(--navy-deep);
-  color: #fff;
-  font-weight: 600;
-  transition: background-color 0.15s ease;
+    background-color: var(--navy-deep);
+    border: 1px solid var(--navy-deep);
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
 }
-.btn-govt-primary:hover { background-color: var(--navy); color: #fff; }
+.btn-govt-primary:hover {
+    background-color: var(--navy);
+    color: #fff;
+}
 
 .btn-govt-outline {
-  border: 1px solid var(--navy-deep);
-  color: var(--navy-deep);
-  background: transparent;
-  font-weight: 600;
-  transition: background-color 0.15s ease, color 0.15s ease;
+    border: 1px solid var(--navy-deep);
+    color: var(--navy-deep);
+    background: transparent;
+    font-weight: 600;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
 }
-.btn-govt-outline:hover { background-color: var(--navy-deep); color: #fff; }
+.btn-govt-outline:hover {
+    background-color: var(--navy-deep);
+    color: #fff;
+}
 
 .btn-govt-cta {
-  background-color: var(--brand-red);
-  border: 1px solid var(--brand-red);
-  color: #fff;
-  font-weight: 700;
-  border-radius: 8px;
-  transition: background-color 0.15s ease;
+    background-color: var(--brand-red);
+    border: 1px solid var(--brand-red);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
 }
-.btn-govt-cta:hover { background-color: var(--brand-red-dark); }
+.btn-govt-cta:hover {
+    background-color: var(--brand-red-dark);
+}
 
 .btn-govt-gold {
-  background-color: var(--brand-gold);
-  border: 1px solid var(--brand-gold);
-  color: var(--navy-deep);
-  font-weight: 700;
-  transition: background-color 0.15s ease;
+    background-color: var(--brand-gold);
+    border: 1px solid var(--brand-gold);
+    color: var(--navy-deep);
+    font-weight: 700;
+    transition: background-color 0.15s ease;
 }
-.btn-govt-gold:hover { background-color: var(--brand-gold-dark); }
+.btn-govt-gold:hover {
+    background-color: var(--brand-gold-dark);
+}
 
 .btn-govt-ghost {
-  background-color: #eef1f5;
-  border: 1px solid var(--hairline);
-  color: var(--ink);
-  font-weight: 600;
+    background-color: #eef1f5;
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+    font-weight: 600;
 }
-.btn-govt-ghost:hover { background-color: #e3e7ec; }
+.btn-govt-ghost:hover {
+    background-color: #e3e7ec;
+}
 
 .btn-govt-success {
-  background-color: var(--status-authorized);
-  border: 1px solid var(--status-authorized);
-  color: #fff;
-  font-weight: 600;
-  transition: background-color 0.15s ease;
+    background-color: var(--status-authorized);
+    border: 1px solid var(--status-authorized);
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
 }
-.btn-govt-success:hover { background-color: #1e5138; }
+.btn-govt-success:hover {
+    background-color: #1e5138;
+}
 
 /* --------------------------------------------------------------------
-   Status badges
+   Status badges (used elsewhere — Passes/Logs)
    -------------------------------------------------------------------- */
 .badge-status {
-  font-weight: 600;
-  padding: 0.4em 0.85em;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  text-transform: capitalize;
+    font-weight: 600;
+    padding: 0.4em 0.85em;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    text-transform: capitalize;
 }
-.badge-authorized { background: var(--status-authorized-bg); color: var(--status-authorized); }
-.badge-denied     { background: var(--status-denied-bg);     color: var(--status-denied); }
-.badge-pending     { background: var(--status-pending-bg);   color: var(--status-pending); }
-.badge-info        { background: var(--status-info-bg);      color: var(--status-info); }
+.badge-authorized {
+    background: var(--status-authorized-bg);
+    color: var(--status-authorized-text);
+}
+.badge-denied {
+    background: var(--status-denied-bg);
+    color: var(--status-denied-text);
+}
+.badge-pending {
+    background: var(--status-pending-bg);
+    color: var(--status-pending);
+}
+.badge-info {
+    background: var(--status-info-bg);
+    color: var(--status-info);
+}
 
 /* --------------------------------------------------------------------
    Filter pills
    -------------------------------------------------------------------- */
 .pill-filter {
-  padding: 0.45rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  border: 1px solid var(--hairline);
-  background: var(--surface);
-  color: var(--ink-muted);
-  white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    padding: 0.45rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--ink-muted);
+    white-space: nowrap;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
 }
-.pill-filter:hover { border-color: var(--navy-light); color: var(--navy-deep); }
+.pill-filter:hover {
+    border-color: var(--navy-light);
+    color: var(--navy-deep);
+}
 .pill-filter.is-active {
-  background: var(--navy-deep);
-  border-color: var(--navy-deep);
-  color: #fff;
+    background: var(--navy-deep);
+    border-color: var(--navy-deep);
+    color: #fff;
 }
 
 /* --------------------------------------------------------------------
-   Scanner — the live-feed box stays dark for contrast/legibility even
-   inside the light shell, same way a camera viewfinder would.
+   Scanner viewport — a white rounded frame housing the dark camera
+   viewfinder, matching the mockup's "Live Scanner Field" panel.
    -------------------------------------------------------------------- */
+.scanner-viewport-inset {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 0.6rem;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
 .scanner-feed {
-  background: var(--navy-deep);
-  border: 2px solid var(--navy);
-  border-radius: 12px;
+    background: var(--navy-deep);
+    border: none;
+    border-radius: 0.7rem;
 }
-.scanner-feed .scanner-placeholder { color: #93a5c4; }
-.scanner-feed .scanner-placeholder i { color: var(--navy-light); }
-
-.status-banner {
-  border-radius: 10px;
-  padding: 1rem 1.1rem;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.scanner-feed .scanner-placeholder {
+    color: #93a5c4;
 }
-.status-banner.is-authorized { background: var(--status-authorized); }
-.status-banner.is-denied { background: var(--status-denied); }
-.status-banner .status-title {
-  font-family: "Source Serif 4", serif;
-  font-weight: 700;
-  font-size: 1.35rem;
+.scanner-feed .scanner-placeholder i {
+    color: var(--navy-light);
 }
 
-.advisory-box {
-  border-radius: 10px;
-  padding: 0.85rem 1rem;
-  font-size: 0.82rem;
-  border: 1px solid;
+/* Building selector — solid white, rounded-2xl, yellow focus ring. */
+.scanner-select {
+    background: #fff;
+    color: var(--ink);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-.advisory-box.is-authorized {
-  background: var(--status-authorized-bg);
-  border-color: #b7d9c4;
-  color: var(--status-authorized);
+.scanner-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 194, 0, 0.55);
 }
-.advisory-box.is-denied {
-  background: var(--status-denied-bg);
-  border-color: #e6bcb2;
-  color: var(--status-denied);
-  font-weight: 600;
+
+/* --------------------------------------------------------------------
+   Result card inset panels (#resultCard)
+   -------------------------------------------------------------------- */
+.status-banner-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.status-banner-card .status-title {
+    font-family: "PT Serif", "Source Serif 4", serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    line-height: 1.2;
+}
+.status-banner-card.is-authorized .status-title {
+    color: var(--status-authorized-text);
+}
+.status-banner-card.is-denied .status-title {
+    color: var(--status-denied-text);
+}
+.status-banner-card .status-subtitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    letter-spacing: 0.06em;
+    color: var(--navy-light);
+    margin-top: 0.25rem;
+}
+.status-banner-card .status-timestamp {
+    font-family: "SFMono-Regular", Menlo, monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    white-space: nowrap;
+}
+
+.meta-grid-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.5rem;
+    font-size: 0.875rem;
+}
+.meta-grid-card .meta-label {
+    display: block;
+    text-transform: capitalize;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+    margin-bottom: 0.15rem;
+}
+.meta-grid-card .meta-value {
+    font-family: "PT Serif", "Source Serif 4", serif;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.advisory-card {
+    border-radius: 1rem;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid;
+}
+.advisory-card.is-authorized {
+    background: var(--status-authorized-bg);
+    border-color: #b7d9c4;
+    color: var(--status-authorized-text);
+}
+.advisory-card.is-denied {
+    background: var(--status-denied-bg);
+    border-color: #f3c2c2;
+    color: var(--status-denied-text);
 }
 
 .quick-scan-panel {
-  background: #fff3c4;
-  border: 1px solid #f3dc8a;
-  border-radius: 12px;
+    background: #fff3c4;
+    border: 1px solid #f3dc8a;
+    border-radius: 12px;
 }
 
 /* --------------------------------------------------------------------
    Visitor pass cards (Passes index)
    -------------------------------------------------------------------- */
 .pass-card {
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
-.pass-card .pass-card-header { border-bottom: 1px solid var(--hairline); }
+.pass-card .pass-card-header {
+    border-bottom: 1px solid var(--hairline);
+}
 .pass-card .pass-card-eyebrow {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--seal-gold);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: capitalize;
+    color: var(--seal-gold);
 }
 .pass-card .pass-card-building {
-  font-family: "Source Serif 4", serif;
-  font-weight: 700;
-  color: var(--navy-deep);
-  font-size: 1.05rem;
+    font-family: "PT Serif", "Source Serif 4", serif;
+    font-weight: 700;
+    color: var(--navy-deep);
+    font-size: 1.05rem;
 }
-.pass-card .pass-card-footer { color: #fff; }
+.pass-card .pass-card-footer {
+    color: #fff;
+}
 
 /* --------------------------------------------------------------------
    Table (Logs)
    -------------------------------------------------------------------- */
-.table-govt thead tr { background: var(--navy-deep); color: #fff; }
-.table-govt thead th {
-  font-weight: 600;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.table-govt thead tr {
+    background: var(--navy-deep);
+    color: #fff;
 }
-.table-govt tbody tr:hover { background: #f5f7fa; }
+.table-govt thead th {
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: capitalize;
+    letter-spacing: 0.06em;
+}
+.table-govt tbody tr:hover {
+    background: #f5f7fa;
+}
 
 /* --------------------------------------------------------------------
    Alerts / session banners
    -------------------------------------------------------------------- */
 .alert-govt-success {
-  background: var(--status-authorized-bg);
-  border: 1px solid #b7d9c4;
-  color: var(--status-authorized);
-  border-radius: 10px;
+    background: var(--status-authorized-bg);
+    border: 1px solid #b7d9c4;
+    color: var(--status-authorized-text);
+    border-radius: 10px;
 }
 
 /* --------------------------------------------------------------------
    Modal (Register Visitor)
    -------------------------------------------------------------------- */
-.modal-govt-panel { background: var(--surface); border-radius: 14px; }
-.modal-govt-panel h3 { font-size: 1.1rem; }
-.modal-govt-panel label { color: var(--ink); font-weight: 600; }
+.modal-govt-panel {
+    background: var(--surface);
+    border-radius: 14px;
+}
+.modal-govt-panel h3 {
+    font-size: 1.1rem;
+}
+.modal-govt-panel label {
+    color: var(--ink);
+    font-weight: 600;
+}
 .modal-govt-panel input,
 .modal-govt-panel select {
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
 }
 .modal-govt-panel input:focus,
 .modal-govt-panel select:focus {
-  outline: none;
-  border-color: var(--navy-light);
-  box-shadow: 0 0 0 3px rgba(31, 78, 140, 0.15);
+    outline: none;
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(31, 78, 140, 0.15);
 }
 
 /* --------------------------------------------------------------------
    Pass preview / print (passes/show)
    -------------------------------------------------------------------- */
 .pass-preview-card {
-  border: 3px solid var(--navy-deep);
-  box-shadow: 0 10px 30px rgba(11, 37, 69, 0.18);
+    border: 3px solid var(--navy-deep);
+    box-shadow: 0 10px 30px rgba(11, 37, 69, 0.18);
+}
+
+/* --------------------------------------------------------------------
+   Vivid solid-color cards (Scanner page — Live Feed / Station / Result)
+   -------------------------------------------------------------------- */
+.card-vivid {
+    position: relative;
+    overflow: hidden;
+    z-index: 0;
+    background-color: var(--ribbon-color, var(--brand-blue));
+    border: none;
+    color: #fff;
+}
+.card-vivid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.17);
+    -webkit-mask-image: url("/images/rattan-pattern-raw.svg");
+    -webkit-mask-repeat: repeat;
+    -webkit-mask-size: 70px 70px;
+    mask-image: url("/images/rattan-pattern-raw.svg");
+    mask-repeat: repeat;
+    mask-size: 70px 70px;
+    pointer-events: none;
+    z-index: 0;
+}
+.card-vivid::after {
+    display: none;
+}
+
+/* Every direct child sits above the rattan overlay. */
+.card-vivid > * {
+    position: relative;
+    z-index: 10;
+}
+
+.card-vivid select,
+.card-vivid input[type="text"],
+.card-vivid button,
+.card-vivid .tag-pill,
+.card-vivid label,
+.card-vivid #resultIdle,
+.card-vivid #resultActive,
+.card-vivid .scanner-viewport-inset {
+    position: relative;
+    z-index: 10;
 }
