@@ -16,7 +16,7 @@
             <div>
                 <p class="eyebrow">Perimeter Security Group &middot; Scanner Terminal</p>
                 <h1>Visitor Access Scanner</h1>
-                <p class="lead">Scan a visitor's pass to validate the authorized building through this scanner.</p>
+                <p class="lead">Scan a visitor's pass to validate authorized building access through this terminal.</p>
             </div>
         </div>
     </div>
@@ -26,12 +26,11 @@
 
     {{-- Yellow: live feed, tall left column --}}
     <div class="lg:col-span-6 card-govt card-vivid p-5 shadow-sm space-y-4" style="--ribbon-color: var(--brand-gold)">
-        <div class="flex justify-between items-center">
-            <div>
-                <span class="tag-pill tag-pill-blue">Live feed</span>
-                <h2 class="card-header-title mt-1"><i class="fa-solid fa-camera"></i> Live scanner feed</h2>
-            </div>
-            <button onclick="toggleCamera()" id="toggleCamBtn" class="text-xs btn-govt-primary px-3 py-1.5 rounded-lg">
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="card-header-title">
+                <i class="fa-solid fa-camera"></i> Live scanner feed
+            </h2>
+            <button onclick="toggleCamera()" id="toggleCamBtn" class="text-xs btn-govt-primary btn-interactive px-3 py-1.5 rounded-lg">
                 <i class="fa-solid fa-power-off"></i> Start webcam
             </button>
         </div>
@@ -39,6 +38,16 @@
         <div class="scanner-viewport-inset">
             <div class="relative scanner-feed overflow-hidden aspect-square flex items-center justify-center">
                 <div id="reader" class="w-full h-full"></div>
+
+                {{-- Scanner target overlay — corner framing graphic + laser sweep, shown only while camera is active --}}
+                <div id="scanTargetOverlay" class="scan-target-overlay hidden">
+                    <span class="scan-corner scan-corner-tl"></span>
+                    <span class="scan-corner scan-corner-tr"></span>
+                    <span class="scan-corner scan-corner-bl"></span>
+                    <span class="scan-corner scan-corner-br"></span>
+                    <span class="scan-laser"></span>
+                </div>
+
                 <div id="camPlaceholder" class="scanner-placeholder absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                     <i class="fa-solid fa-camera text-5xl mb-3"></i>
                     <p class="text-xs">Awaiting camera feed.</p>
@@ -51,7 +60,7 @@
     <div class="lg:col-span-6 flex flex-col gap-6">
 
         <div class="card-govt card-vivid p-5 shadow-sm" style="--ribbon-color: var(--brand-red)">
-            <label class="card-header-title flex items-center gap-2 mb-2">
+            <label class="card-header-title mb-2">
                 <i class="fa-solid fa-building-circle-check"></i> Personnel Station Location
             </label>
             <select id="scannerBuildingId" class="scanner-select w-full rounded-2xl px-4 py-3 font-bold">
@@ -61,17 +70,16 @@
             </select>
         </div>
 
-        <div id="resultCard" class="card-govt card-vivid p-5 shadow-sm flex-grow flex flex-col gap-4" style="--ribbon-color: var(--brand-blue)">
-            <div id="resultIdle" class="py-12 flex flex-col items-center justify-center text-center space-y-3">
-                <div class="w-20 h-20 bg-white text-slate-400 rounded-full flex items-center justify-center text-3xl">
-                    <i class="fa-solid fa-id-card"></i>
-                </div>
-                <span class="tag-pill tag-pill-red">Scan result</span>
-                <h3 class="text-lg font-bold text-white">Awaiting pass scan</h3>
+        <div id="resultCard" class="card-govt card-vivid p-5 shadow-sm flex-grow flex flex-col" style="--ribbon-color: var(--brand-blue)">
+            <h2 class="card-header-title mb-4"><i class="fa-solid fa-shield-halved"></i> Authorization Status</h2>
+
+            <div id="resultIdle" class="idle-panel flex-grow flex flex-col items-center justify-center text-center">
+                <i class="fa-solid fa-id-card idle-panel-icon"></i>
+                <h3 class="idle-panel-title">Awaiting Pass Scan</h3>
             </div>
 
-            <div id="resultActive" class="hidden flex flex-col gap-4">
-                <div id="statusHeader" class="status-banner-card">
+            <div id="resultActive" class="hidden flex-grow flex flex-col gap-4">
+                <div id="statusHeader" class="status-banner-card anim-fade-in-up">
                     <div>
                         <div id="statusText" class="status-title"></div>
                         <div id="statusSubtitle" class="status-subtitle"></div>
@@ -79,14 +87,14 @@
                     <div id="scanTimestamp" class="status-timestamp"></div>
                 </div>
 
-                <div class="meta-grid-card">
+                <div class="meta-grid-card anim-fade-in-up anim-delay-1">
                     <div><span class="meta-label">Visitor</span><div id="resVisitorName" class="meta-value"></div></div>
                     <div><span class="meta-label">Pass #</span><div id="resPassNum" class="meta-value font-mono"></div></div>
                     <div><span class="meta-label">Authorized Bldg.</span><div id="resPassBldg" class="meta-value"></div></div>
                     <div><span class="meta-label">Scanned At</span><div id="resScanLoc" class="meta-value"></div></div>
                 </div>
 
-                <div id="securityAdvisory" class="advisory-card"><span id="advisoryText"></span></div>
+                <div id="securityAdvisory" class="advisory-card anim-fade-in-up anim-delay-2"><span id="advisoryText"></span></div>
             </div>
         </div>
 
@@ -137,7 +145,16 @@ async function processScanToken(token) {
 
 function displayScanResultUI(data) {
     document.getElementById('resultIdle').classList.add('hidden');
-    document.getElementById('resultActive').classList.remove('hidden');
+    const activeEl = document.getElementById('resultActive');
+    activeEl.classList.remove('hidden');
+
+    // Re-trigger the fade-in-up entrance animation on every new scan by
+    // forcing a reflow between removing and re-adding the animation class.
+    activeEl.querySelectorAll('.anim-fade-in-up').forEach(el => {
+        el.classList.remove('anim-fade-in-up');
+        void el.offsetWidth;
+        el.classList.add('anim-fade-in-up');
+    });
 
     document.getElementById('scanTimestamp').innerText = data.timestamp;
     document.getElementById('resVisitorName').innerText = data.visitor_name;
@@ -150,16 +167,16 @@ function displayScanResultUI(data) {
     const advisoryBox = document.getElementById('securityAdvisory');
 
     if (data.result === 'AUTHORIZED') {
-        header.className = 'status-banner-card is-authorized';
+        header.className = 'status-banner-card is-authorized anim-fade-in-up';
         document.getElementById('statusText').innerText = 'Access authorized';
         document.getElementById('statusSubtitle').innerText = 'Visitor authorized for this building';
-        advisoryBox.className = 'advisory-card is-authorized';
+        advisoryBox.className = 'advisory-card is-authorized anim-fade-in-up anim-delay-2';
         advisory.innerText = `Confirmed: ${data.visitor_name} holds a valid pass for ${data.scanned_building}.`;
     } else {
-        header.className = 'status-banner-card is-denied';
+        header.className = 'status-banner-card is-denied anim-fade-in-up';
         document.getElementById('statusText').innerText = 'Denied: ' + data.result.charAt(0) + data.result.slice(1).toLowerCase();
         document.getElementById('statusSubtitle').innerText = 'Security alert';
-        advisoryBox.className = 'advisory-card is-denied';
+        advisoryBox.className = 'advisory-card is-denied anim-fade-in-up anim-delay-2';
         advisory.innerText = data.reason;
     }
     playAudioFeedback(data.result === 'AUTHORIZED');
@@ -168,6 +185,7 @@ function displayScanResultUI(data) {
 function toggleCamera() {
     const btn = document.getElementById('toggleCamBtn');
     const placeholder = document.getElementById('camPlaceholder');
+    const targetOverlay = document.getElementById('scanTargetOverlay');
     if (!isCameraActive) {
         html5QrcodeScanner = new Html5Qrcode("reader");
         html5QrcodeScanner.start(
@@ -188,20 +206,22 @@ function toggleCamera() {
         ).then(() => {
             isCameraActive = true;
             btn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop camera';
-            btn.className = "text-xs btn-govt-outline px-3 py-1.5 rounded-lg";
+            btn.className = "text-xs btn-govt-outline btn-interactive px-3 py-1.5 rounded-lg";
             btn.style.borderColor = 'var(--status-denied)';
             btn.style.color = 'var(--status-denied)';
             placeholder.classList.add('hidden');
+            targetOverlay.classList.remove('hidden');
         }).catch(err => alert("Camera error: " + err));
     } else {
         html5QrcodeScanner.stop().then(() => {
             html5QrcodeScanner.clear();
             isCameraActive = false;
             btn.innerHTML = '<i class="fa-solid fa-power-off"></i> Start webcam';
-            btn.className = "text-xs btn-govt-primary px-3 py-1.5 rounded-lg";
+            btn.className = "text-xs btn-govt-primary btn-interactive px-3 py-1.5 rounded-lg";
             btn.style.borderColor = '';
             btn.style.color = '';
             placeholder.classList.remove('hidden');
+            targetOverlay.classList.add('hidden');
         });
     }
 }

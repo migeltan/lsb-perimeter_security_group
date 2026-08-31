@@ -215,6 +215,27 @@ h3,
 }
 
 /* --------------------------------------------------------------------
+   Sunburst dynamic micro-animation — gentle scale + rotate so the
+   vector graphics don't read as static/flat. transform-origin: center
+   keeps the bleed-off-edge positioning stable while it breathes.
+   -------------------------------------------------------------------- */
+@keyframes sunburst-float {
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.03) rotate(3deg);
+    }
+}
+.sunburst-gold,
+.sunburst-red,
+.sunburst-blue {
+    animation: sunburst-float 14s ease-in-out infinite;
+    transform-origin: center center;
+}
+
+/* --------------------------------------------------------------------
    Hero — .hero-frame is the thick Yellow-Blue-Red-Blue-Yellow segmented
    border; .hero-frame-rattan is a single continuous masked overlay
    spanning the entire frame so the texture never restarts or shifts tone
@@ -406,11 +427,24 @@ h3,
 .card-header-title {
     font-family: "PT Serif", "Source Serif 4", serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
+}
+.card-header-title i {
+    font-size: 1.1em;
+    color: #fff;
+}
+.card-header-title-dark {
+    color: var(--navy-deep);
+    text-shadow: none;
+}
+.card-header-title-dark i {
+    color: var(--navy-deep);
 }
 
 /* --------------------------------------------------------------------
@@ -775,6 +809,7 @@ h3,
     border: none;
     color: #fff;
 }
+/* CHANGE: .card-vivid::before background-size from 70px 70px to 200px 200px */
 .card-vivid::before {
     content: "";
     position: absolute;
@@ -782,10 +817,10 @@ h3,
     background-color: rgba(0, 0, 0, 0.17);
     -webkit-mask-image: url("/images/rattan-pattern-raw.svg");
     -webkit-mask-repeat: repeat;
-    -webkit-mask-size: 70px 70px;
+    -webkit-mask-size: 200px 200px;
     mask-image: url("/images/rattan-pattern-raw.svg");
     mask-repeat: repeat;
-    mask-size: 70px 70px;
+    mask-size: 200px 200px;
     pointer-events: none;
     z-index: 0;
 }
@@ -809,4 +844,307 @@ h3,
 .card-vivid .scanner-viewport-inset {
     position: relative;
     z-index: 10;
+}
+
+/* --------------------------------------------------------------------
+   Footer / SMART logo
+   -------------------------------------------------------------------- */
+.site-footer {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1rem 3rem;
+}
+.footer-logo {
+    max-width: 190px;
+    height: auto;
+}
+
+/* NEW: forces the html5-qrcode video/canvas to fill #reader edge-to-edge
+   instead of leaving a gap sized by the camera's native aspect ratio —
+   that gap was showing .scanner-feed's navy background through as a
+   dark rectangle. !important is required because the library sets
+   width/height inline via JS after the stream starts. */
+#reader {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+#reader video,
+#reader canvas,
+#reader__scan_region video,
+#reader__scan_region canvas,
+#reader__scan_region {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+#reader__dashboard {
+    display: none !important; /* hide the library's default file-upload/stop UI row so it doesn't push the video down and create a gap at the bottom */
+}
+
+.idle-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    padding: 2.5rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(2px);
+}
+.idle-panel-icon {
+    font-size: 2.5rem;
+    color: #94a3b8;
+    margin-bottom: 0.75rem;
+    animation: idle-pulse 2.2s ease-in-out infinite;
+}
+.idle-panel-title {
+    font-family: "PT Serif", "Source Serif 4", serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #334155;
+}
+@keyframes idle-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}
+
+.scan-target-overlay {
+    position: absolute;
+    inset: 12%;
+    z-index: 20;
+    pointer-events: none;
+}
+.scan-corner {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border: 3px solid #fff;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+}
+.scan-corner-tl {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+}
+.scan-corner-tr {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+}
+.scan-corner-bl {
+    bottom: 0;
+    left: 0;
+    border-right: none;
+    border-top: none;
+}
+.scan-corner-br {
+    bottom: 0;
+    right: 0;
+    border-left: none;
+    border-top: none;
+}
+
+.scan-laser {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 194, 0, 0.9),
+        transparent
+    );
+    box-shadow: 0 0 8px 2px rgba(255, 194, 0, 0.7);
+    animation: laser-scan 2.4s ease-in-out infinite;
+}
+@keyframes laser-scan {
+    0% {
+        top: 0%;
+    }
+    50% {
+        top: 100%;
+    }
+    100% {
+        top: 0%;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.anim-fade-in-up {
+    animation: fadeInUp 0.35s ease-out both;
+}
+.anim-delay-1 {
+    animation-delay: 0.06s;
+}
+.anim-delay-2 {
+    animation-delay: 0.12s;
+}
+
+/* --------------------------------------------------------------------
+   Interactive control focus/hover — gold focus ring + gentle scale
+   feedback on primary action buttons and the building selector.
+   -------------------------------------------------------------------- */
+.btn-interactive {
+    transition:
+        transform 0.2s ease,
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+.btn-interactive:hover {
+    transform: scale(1.02);
+}
+.btn-interactive:active {
+    transform: scale(0.98);
+}
+.btn-interactive:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 194, 0, 0.6);
+}
+
+/* --/* --------------------------------------------------------------------
+   ADDITIONS — v8 — Logs page rebuild (Filter by Building / Filter by
+   Result vivid cards + Audit Logs table panel)
+   Append this block to the end of your existing theme-govt.css.
+   Supersedes the v7 block from the previous round — if you already
+   added v7, keep .row-alt-govt, .pager-footer-govt, .pager-govt, and
+   .pager-btn-govt (unchanged below) but replace .search-field-govt
+   with this version, which adds the --vivid modifier.
+   -------------------------------------------------------------------- */
+
+/* Search input with leading icon, used in the Logs filter bar.
+   Base version sits on white/paper backgrounds. */
+.search-field-govt {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.search-field-govt i {
+    position: absolute;
+    left: 0.85rem;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    pointer-events: none;
+}
+.search-field-govt input {
+    width: 100%;
+    min-width: 220px;
+    padding: 0.6rem 0.75rem 0.6rem 2rem;
+    font-size: 0.75rem;
+    border: 1px solid var(--hairline);
+    border-radius: 0.5rem;
+    background: var(--surface);
+    color: var(--ink);
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+.search-field-govt input:focus {
+    outline: none;
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(31, 78, 140, 0.15);
+}
+
+/* Vivid modifier — used when the search field sits directly on a
+   card-vivid gold background (Audit Logs card header row). Keeps the
+   input itself solid white per .scanner-select convention so it stays
+   readable against the rattan-textured gold fill. */
+.search-field-govt--vivid input {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.search-field-govt--vivid input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 194, 0, 0.55);
+}
+.search-field-govt--vivid i {
+    color: var(--ink-muted);
+}
+
+/* White inset panel wrapping the logs table inside the gold card-vivid
+   background — same visual pattern as .meta-grid-card / .status-banner-card
+   used inside the Scanner result card. */
+.table-panel-govt {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+.table-panel-govt .table-govt thead tr {
+    border-radius: 0.6rem;
+}
+
+/* Zebra striping for the logs table */
+.table-govt tbody tr.row-alt-govt {
+    background: var(--paper);
+}
+.table-govt tbody tr.row-alt-govt:hover {
+    background: #f5f7fa;
+}
+
+/* Pagination footer + navy pill nav (matches mockup pagination) */
+.pager-footer-govt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1rem 0.5rem;
+}
+.pager-count-govt {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    margin: 0;
+}
+.pager-govt {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--navy-deep);
+    border-radius: 999px;
+    padding: 0.3rem;
+}
+.pager-btn-govt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #c9d4e6;
+    text-decoration: none;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.pager-btn-govt:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+.pager-btn-govt.is-active {
+    background: var(--brand-blue);
+    color: #fff;
+}
+.pager-btn-govt.is-disabled {
+    opacity: 0.35;
+    pointer-events: none;
 }
