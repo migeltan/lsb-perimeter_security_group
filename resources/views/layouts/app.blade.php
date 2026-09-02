@@ -52,11 +52,13 @@
             </div>
         @endif
         @yield('content')
-    </main>
+      </main>
 
     <footer class="site-footer">
-        <img src="{{ asset('images/lsb-full-logo.png') }}" alt="SMART Internship Program" class="footer-logo">
+        <img src="{{ asset('images/lsb-full-logo.png') }}" alt="INSPIRE Internship Program" class="footer-logo">
     </footer>
+
+    @yield('scripts')
 
 </body>
 </html>

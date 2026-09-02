@@ -25,7 +25,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     {{-- Yellow: live feed, tall left column --}}
-    <div class="lg:col-span-6 card-govt card-vivid p-5 shadow-sm space-y-4" style="--ribbon-color: var(--brand-gold)">
+    <div class="lg:col-span-6 card-govt card-vivid p-5 shadow-sm space-y-4 self-start" style="--ribbon-color: var(--brand-gold)">
         <div class="flex items-center justify-between gap-3">
             <h2 class="card-header-title">
                 <i class="fa-solid fa-camera"></i> Live scanner feed
@@ -87,11 +87,20 @@
                     <div id="scanTimestamp" class="status-timestamp"></div>
                 </div>
 
-                <div class="meta-grid-card anim-fade-in-up anim-delay-1">
-                    <div><span class="meta-label">Visitor</span><div id="resVisitorName" class="meta-value"></div></div>
-                    <div><span class="meta-label">Pass #</span><div id="resPassNum" class="meta-value font-mono"></div></div>
-                    <div><span class="meta-label">Authorized Bldg.</span><div id="resPassBldg" class="meta-value"></div></div>
-                    <div><span class="meta-label">Scanned At</span><div id="resScanLoc" class="meta-value"></div></div>
+                               <div class="flex gap-4 items-stretch w-full anim-fade-in-up">
+                    <div class="flex-shrink-0">
+                        <img id="resPhoto" class="rounded-lg border w-40 h-40 object-cover hidden" alt="Visitor photo">
+                        <div id="resPhotoPlaceholder" class="rounded-lg border w-40 h-40 flex items-center justify-center text-slate-300">
+                            <i class="fa-solid fa-user text-3xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="meta-grid-card flex-1 w-full grid grid-cols-2 gap-4 content-center anim-delay-1">
+                        <div><span class="meta-label">Visitor</span><div id="resVisitorName" class="meta-value"></div></div>
+                        <div><span class="meta-label">Pass #</span><div id="resPassNum" class="meta-value font-mono"></div></div>
+                        <div><span class="meta-label">Authorized Bldg.</span><div id="resPassBldg" class="meta-value"></div></div>
+                        <div><span class="meta-label">Scanned At</span><div id="resScanLoc" class="meta-value"></div></div>
+                    </div>
                 </div>
 
                 <div id="securityAdvisory" class="advisory-card anim-fade-in-up anim-delay-2"><span id="advisoryText"></span></div>
@@ -161,6 +170,17 @@ function displayScanResultUI(data) {
     document.getElementById('resPassNum').innerText = data.pass_number;
     document.getElementById('resPassBldg').innerText = data.authorized_building;
     document.getElementById('resScanLoc').innerText = data.scanned_building;
+
+    const photoImg = document.getElementById('resPhoto');
+    const photoPlaceholder = document.getElementById('resPhotoPlaceholder');
+    if (data.photo_url) {
+        photoImg.src = data.photo_url;
+        photoImg.classList.remove('hidden');
+        photoPlaceholder.classList.add('hidden');
+    } else {
+        photoImg.classList.add('hidden');
+        photoPlaceholder.classList.remove('hidden');
+    }
 
     const header = document.getElementById('statusHeader');
     const advisory = document.getElementById('advisoryText');

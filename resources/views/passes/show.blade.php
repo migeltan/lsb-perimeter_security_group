@@ -2,20 +2,34 @@
 @section('title', 'Pass Preview')
 
 @section('content')
+@php
+    $isMulti = $pass->is_multi_building;
+
+    // Save your uploaded "Multiple Access" template to this path.
+    // Adjust if you'd rather keep it somewhere else.
+$templateImage = $isMulti
+    ? asset('images/passes/ma.png')
+    : asset($pass->building->template_image);
+
+    // Dark/charcoal so the QR reads cleanly against the gray card —
+    // same idea as the maroon-on-red used for North Wing, etc.
+    $qrColor = $isMulti ? '#1c1f26' : $pass->building->qr_color_hex;
+@endphp
+
 <div class="flex flex-col items-center gap-4">
     <p class="eyebrow-label">House of Representatives &middot; Visitor pass</p>
     <div class="flex justify-center">
         <div class="space-y-4">
             <div id="printablePassArea" class="pass-preview-card relative w-[300px] h-[500px] rounded-xl overflow-hidden"
-                 style="background-image:url('{{ asset($pass->building->template_image) }}'); background-size:cover; background-position:center;">
+                 style="background-image:url('{{ $templateImage }}'); background-size:cover; background-position:center;">
 
                 <!-- QR overlay - adjust top/left % if misaligned with your template's dashed box -->
-                <div class="absolute left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-lg" style="top:44%;">
+                <div class="absolute left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-lg" style="top:48%;">
                     <div id="qrCodeContainer"></div>
                 </div>
 
                 <!-- Pass number overlay -->
-                <div class="absolute left-1/2 -translate-x-1/2 text-white font-black font-mono drop-shadow-md" style="top:72%; font-size:2.5rem;">
+                <div class="absolute left-1/2 -translate-x-1/2 text-white font-black font-mono drop-shadow-md" style="top:78%; font-size:2.5rem;">
                     {{ $pass->pass_number }}
                 </div>
             </div>
@@ -33,7 +47,7 @@
 new QRCode(document.getElementById("qrCodeContainer"), {
     text: "{{ $pass->qr_token }}",
     width: 130, height: 130,
-    colorDark: "{{ $pass->building->qr_color_hex }}",
+    colorDark: "{{ $qrColor }}",
     colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H
 });

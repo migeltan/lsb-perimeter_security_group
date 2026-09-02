@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Building extends Model
@@ -17,5 +18,13 @@ class Building extends Model
     public function scanLogs(): HasMany
     {
         return $this->hasMany(ScanLog::class, 'scanned_building_id');
+    }
+
+    /**
+     * Multi-building passes that include this building in their pivot.
+     */
+    public function multiAccessPasses(): BelongsToMany
+    {
+        return $this->belongsToMany(VisitorPass::class, 'pass_building', 'building_id', 'visitor_pass_id');
     }
 }

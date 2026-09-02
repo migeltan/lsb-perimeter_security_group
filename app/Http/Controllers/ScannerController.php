@@ -10,6 +10,9 @@ use Illuminate\Http\JsonResponse;
 
 class ScannerController extends Controller
 {
+    // Slate/charcoal accent for Multiple Access badges, per spec.
+    private const BADGE_MULTI_COLOR = '#475569';
+
     public function index()
     {
         $buildings = Building::orderBy('name')->get();
@@ -27,8 +30,9 @@ class ScannerController extends Controller
         ]);
 
         $scannerBuilding = Building::findOrFail($data['scanned_building_id']);
-        $pass = VisitorPass::with('building')->where('qr_token', $data['token'])->first();
+        $pass = VisitorPass::with(['building', 'buildings'])->where('qr_token', $data['token'])->first();
 
+        $direction = 'null';
         $result = 'INVALID';
         $reason = 'QR Token payload not recognized in central database.';
         $visitorName = 'Unknown / Unregistered';
@@ -39,8 +43,9 @@ class ScannerController extends Controller
         if ($pass) {
             $visitorName = $pass->visitor_name ?: 'Unassigned Card';
             $passNumber = $pass->pass_number;
-            $authorizedBuildingName = $pass->building->name;
-            $colorHex = $pass->building->color_hex;
+            $authorizedBuildingName = $pass->authorizedBuildingNames();
+            $colorHex = $pass->is_multi_building ? self::BADGE_MULTI_COLOR : $pass->building->color_hex;
+            $photoUrl = $pass->photo_path ? \Storage::disk('public')->url($pass->photo_path) : null;
 
             if ($pass->status === 'expired') {
                 $result = 'EXPIRED';
@@ -48,14 +53,27 @@ class ScannerController extends Controller
             } elseif ($pass->status === 'revoked') {
                 $result = 'REVOKED';
                 $reason = 'Visitor pass is REVOKED by Security.';
-            } elseif ($pass->building_id !== $scannerBuilding->id) {
-                $result = 'UNAUTHORIZED';
-                $reason = "BUILDING MISMATCH! Pass is authorized ONLY for [{$authorizedBuildingName}], but scanned at [{$scannerBuilding->name}].";
-            } else {
-                $result = 'AUTHORIZED';
-                $reason = 'Access Granted - Building Match Validated';
-            }
+            } elseif (! $pass->isAuthorizedFor($scannerBuilding->id)) {
+    $result = 'UNAUTHORIZED';
+    $reason = "BUILDING MISMATCH! Pass is authorized ONLY for [{$authorizedBuildingName}], but scanned at [{$scannerBuilding->name}].";
+} elseif ($pass->current_building_id && (int) $pass->current_building_id !== $scannerBuilding->id) {
+    $result = 'BLOCKED';
+    $currentName = $pass->currentBuilding?->name ?? 'another building';
+    $reason = "Visitor must scan OUT of {$currentName} before entering {$scannerBuilding->name}.";
+} elseif ($pass->current_building_id === null) {
+    $direction = 'in';
+    $result = 'AUTHORIZED';
+    $reason = "Access Granted - Entry logged at {$scannerBuilding->name}.";
+    $pass->update(['current_building_id' => $scannerBuilding->id]);
+} else {
+    $direction = 'out';
+    $result = 'AUTHORIZED';
+    $reason = "Access Granted - Exit logged at {$scannerBuilding->name}.";
+    $pass->update(['current_building_id' => null]);
+}
         }
+
+        
 
         $log = ScanLog::create([
             'visitor_pass_id' => $pass?->id,
@@ -66,6 +84,7 @@ class ScannerController extends Controller
             'authorized_building_snapshot' => $authorizedBuildingName,
             'result' => $result,
             'reason' => $reason,
+            'direction' => $direction,
         ]);
 
         return response()->json([
@@ -76,6 +95,7 @@ class ScannerController extends Controller
             'authorized_building' => $authorizedBuildingName,
             'scanned_building' => $scannerBuilding->name,
             'color_hex' => $colorHex,
+            'photo_url' => $photoUrl ?? null,
             'timestamp' => $log->created_at->format('h:i:s A'),
         ]);
     }

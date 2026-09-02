@@ -1300,3 +1300,35 @@ h3,
     border: none;
     border-top: 1px solid var(--hairline);
 }
+
+/* --------------------------------------------------------------------
+   ADDITIONS — v10 — Passes registry: Multiple Access pass type toggle
+   and Slate/Charcoal badge color for multi-building passes.
+   -------------------------------------------------------------------- */
+
+:root {
+    --badge-multi: #475569;
+}
+
+.pass-type-option {
+    cursor: pointer;
+    display: block;
+}
+.pass-type-btn {
+    display: block;
+    text-align: center;
+    padding: 0.55rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    color: var(--ink-muted);
+    font-weight: 700;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
+}
+.pass-type-btn.is-active {
+    background: var(--navy-deep);
+    border-color: var(--navy-deep);
+    color: #fff;
+}

@@ -20,3 +20,6 @@ Route::get('/logs/export', [LogController::class, 'export'])->name('logs.export'
 // your auth/role setup looks like.
 Route::delete('/logs/purge/range', [LogController::class, 'purgeRange'])->name('logs.purge.range');
 Route::delete('/logs/purge/all', [LogController::class, 'purgeAll'])->name('logs.purge.all');
+
+Route::put('/passes/{pass}/buildings', [PassController::class, 'updateBuildings'])->name('passes.buildings.update');
+Route::post('/passes/{pass}/unassign', [PassController::class, 'unassign'])->name('passes.unassign');
