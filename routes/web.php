@@ -14,3 +14,9 @@ Route::get('/passes/{pass}', [PassController::class, 'show'])->name('passes.show
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 Route::get('/logs/export', [LogController::class, 'export'])->name('logs.export');
+
+// NEW: purge/delete endpoints. No auth middleware added — none exists on the
+// routes above either, so add ->middleware(...) here once you tell me what
+// your auth/role setup looks like.
+Route::delete('/logs/purge/range', [LogController::class, 'purgeRange'])->name('logs.purge.range');
+Route::delete('/logs/purge/all', [LogController::class, 'purgeAll'])->name('logs.purge.all');

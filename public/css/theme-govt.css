@@ -1018,7 +1018,7 @@ h3,
     box-shadow: 0 0 0 3px rgba(255, 194, 0, 0.6);
 }
 
-/* --/* --------------------------------------------------------------------
+/* --------------------------------------------------------------------
    ADDITIONS — v8 — Logs page rebuild (Filter by Building / Filter by
    Result vivid cards + Audit Logs table panel)
    Append this block to the end of your existing theme-govt.css.
@@ -1147,4 +1147,156 @@ h3,
 .pager-btn-govt.is-disabled {
     opacity: 0.35;
     pointer-events: none;
+}
+
+/* --------------------------------------------------------------------
+   ADDITIONS — v9 — Logs page: live-filter table scroll, purge modal.
+   Reuses .btn-govt-cta (danger), .btn-govt-gold (accent),
+   .alert-govt-success, .modal-govt-panel, .table-panel-govt,
+   .pager-footer-govt, and .row-alt-govt — none of those are redefined
+   here, only extended where a property was missing.
+   -------------------------------------------------------------------- */
+
+/* Fixed-height scrollable table container (keeps footer toolbar pinned) */
+.table-scroll-govt {
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border-radius: 0.75rem;
+}
+
+.table-scroll-govt thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--navy-deep);
+    color: #fff;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.4);
+    border-radius: 999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.6);
+}
+
+/* Higher-specificity hover accent so it wins over the existing
+   .table-govt tbody tr:hover rule (same base idea, warmer tint per spec). */
+.table-govt tbody tr.row-govt:hover {
+    background-color: rgba(255, 251, 235, 0.6);
+    transition: background-color 150ms ease;
+}
+
+/* .alert-govt-success already exists above but only sets
+   background/border/color; add the missing layout properties without
+   redeclaring what's there. */
+.alert-govt-success,
+.alert-govt-error {
+    padding: 0.85rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.alert-govt-error {
+    background: var(--status-denied-bg);
+    border: 1px solid #f3c2c2;
+    color: var(--status-denied-text);
+    border-radius: 10px;
+}
+
+/* Purge modal — reuses .modal-govt-panel's white/rounded shell,
+   adds the overlay + internal structure it didn't need before. */
+.modal-overlay-govt {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 37, 69, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+.modal-overlay-govt.hidden {
+    display: none;
+}
+.modal-purge-panel {
+    width: 100%;
+    max-width: 28rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(11, 37, 69, 0.25);
+}
+.modal-header-govt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--hairline);
+}
+.modal-header-govt h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--navy-deep);
+}
+.modal-close-govt {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--ink-muted);
+}
+.modal-body-govt {
+    padding: 1.4rem;
+}
+.modal-option-title-govt {
+    font-weight: 700;
+    color: var(--navy-deep);
+}
+.modal-option-title-govt--danger {
+    color: var(--status-denied-text);
+}
+.modal-option-hint-govt {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    margin-top: 0.25rem;
+}
+.modal-field-govt {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    gap: 0.25rem;
+}
+.modal-field-govt input,
+.modal-confirm-input-govt {
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+.modal-field-govt input:focus,
+.modal-confirm-input-govt:focus {
+    outline: none;
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(31, 78, 140, 0.15);
+}
+.modal-divider-govt {
+    border: none;
+    border-top: 1px solid var(--hairline);
 }
