@@ -24,12 +24,12 @@ $templateImage = $isMulti
                  style="background-image:url('{{ $templateImage }}'); background-size:cover; background-position:center;">
 
                 <!-- QR overlay - adjust top/left % if misaligned with your template's dashed box -->
-                <div class="absolute left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-lg" style="top:48%;">
+                <div class="absolute left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-lg" style="top:45%;">
                     <div id="qrCodeContainer"></div>
                 </div>
 
                 <!-- Pass number overlay -->
-                <div class="absolute left-1/2 -translate-x-1/2 text-white font-black font-mono drop-shadow-md" style="top:78%; font-size:2.5rem;">
+                <div class="absolute left-1/2 -translate-x-1/2 text-white font-black font-mono drop-shadow-md" style="top:80%; font-size:2.5rem;">
                     {{ $pass->pass_number }}
                 </div>
             </div>
@@ -46,7 +46,7 @@ $templateImage = $isMulti
 <script>
 new QRCode(document.getElementById("qrCodeContainer"), {
     text: "{{ $pass->qr_token }}",
-    width: 130, height: 130,
+    width: 140, height: 140,
     colorDark: "{{ $qrColor }}",
     colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H

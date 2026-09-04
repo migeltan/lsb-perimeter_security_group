@@ -338,6 +338,15 @@ h3,
     mask-size: 90px 90px;
 }
 
+/* Cohesive serif titles across hero, section headers, building cards, and modals */
+.building-card-frame h3,
+.card-header-title,
+#buildingModalTitle,
+#registerModal h3 {
+    font-family: "PT Serif", "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+}
+
 .hero-inner-panel {
     position: relative;
     z-index: 3;
@@ -1330,5 +1339,26 @@ h3,
 .pass-type-btn.is-active {
     background: var(--navy-deep);
     border-color: var(--navy-deep);
+    color: #fff;
+}
+
+.modal-filter-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.35rem 0.9rem;
+    border-radius: 9999px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.modal-filter-pill:hover {
+    background: #e2e8f0;
+}
+.modal-filter-pill.is-active {
+    background: var(--navy-deep, #1e3a8a);
     color: #fff;
 }
