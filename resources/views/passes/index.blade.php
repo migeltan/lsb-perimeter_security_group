@@ -15,7 +15,7 @@
         'MB'    => 'main.png',
         'SWA'   => 'rvm.png', // TODO: swap once South Wing Annex photo is supplied
         'MULTI' => 'multi.png',
-    ];
+    ]; //asdadadadasdadadadadadadadddd
 @endphp
 
 {{-- Hero — reuses the exact segmented-border treatment from scanner/index.blade.php and logs/index.blade.php --}}
