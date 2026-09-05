@@ -1,31 +1,44 @@
-# Proposed QR-Based Visitor Building Access Control and Monitoring System
+# LSB Visitor Access — QR-Based Visitor Building Access Control & Monitoring System
 
-**Department:** Legislative Security Bureau | Perimeter Security Group
+**Department:** Legislative Security Bureau (LSB) | Perimeter Security Group
 **Institution:** House of Representatives of the Philippines
-**Proposed by:** Migel H. Tan (SMART Internship Program)
-
-📄 **[Read the full proposal paper](./proposed_qr_visitor_access_system.md)**
+**Author:** Migel H. Tan
+**Program:** INSPIRE Internship Program (formerly SMART Internship Program)
 
 ---
 
-## About This Prototype
+## About This Project
 
-This repository is the working software prototype built to accompany the proposal above. It is **not** a finished or production-ready system — it exists to demonstrate, concretely, how the concept described in the paper would actually function: a guard scanning a visitor's QR pass, and the system determining in real time whether that visitor is authorized to enter the specific building where the scan occurred.
+This is a working software prototype built during an internship placement under the **Legislative Security Bureau (LSB)** at the **House of Representatives**. It demonstrates how a centralized, QR-based visitor access system could work in practice, replacing part of the manual process currently used to validate visitor entry across the HOR complex.
 
-As described in the proposal's Introduction, the current visitor access process at the House of Representatives complex relies on physical, color-coded visitor ID cards assigned per building (e.g. a red "VISITOR 0001" card for North Wing), validated manually by security personnel against a physical logbook. This works, but has no centralized way of automatically catching a visitor authorized for one building attempting to enter another.
+Today, visitor access relies on physical, color-coded ID cards assigned per building (e.g. a red "VISITOR 0001" card for North Wing), checked manually by security personnel against a physical logbook. That process has no automatic way of catching a visitor authorized for one building attempting to enter a different one.
 
-This prototype implements the paper's core proposed mechanism: each visitor pass is tied to a unique QR token; scanning it at a building's terminal checks that token against a central database and instantly returns **AUTHORIZED** or **UNAUTHORIZED**, while logging every attempt — successful or not — to a centralized audit trail. In line with the proposal, it is meant to _supplement_ existing guards and physical passes, not replace them.
+This prototype implements a simple core mechanism: every visitor pass is tied to a unique **QR token**. Scanning it at a building's terminal checks that token against a central database and instantly returns a result — **AUTHORIZED**, **UNAUTHORIZED**, **BLOCKED**, **EXPIRED**, **REVOKED**, or **INVALID** — while logging every scan attempt, successful or not, to a centralized, searchable, exportable audit trail. It is meant to _supplement_ existing guards and physical passes, not replace them.
 
 ---
 
 ## Tech Stack
 
-- **Laravel 11** (PHP 8.4) — backend framework, routing, database ORM
-- **MySQL** (via XAMPP) — persistent storage for buildings, passes, and scan logs
-- **Blade** — server-rendered views (no separate frontend framework)
+- **Laravel** (PHP ^8.3, `laravel/framework` ^13.17) — backend framework, routing, ORM
+- **MySQL** — persistent storage (configured via `.env`; SQLite is also supported out of the box for local/dev use)
+- **Blade** — server-rendered views (no separate SPA frontend)
+- **Vite + Tailwind CSS 4** — asset bundling and styling
+- **endroid/qr-code** — server-side QR code generation for printable passes
 - **html5-qrcode** (JS) — webcam-based QR scanning in the browser
-- **qrcodejs** (JS) — renders the QR code image client-side from the pass's token
-- **Herd** — local PHP server/environment
+- **Pest / PHPUnit** — testing
+
+---
+
+## Key Features
+
+- **Single-building passes** — 6 seeded buildings (North Wing, South Wing, RVM Building, North Gate, Main Building, South Wing Annex), 5 passes each, with a unique QR token per pass.
+- **Multiple Access ("Multi-Building") passes** — a visitor can be issued one pass authorized across several buildings at once, tracked via a `pass_building` pivot table. Reassigning an unassigned Multi card reuses its existing QR token rather than minting a new one, since these are meant to be printed onto physical PVC cards.
+- **In/Out occupancy tracking** — the system remembers which building a visitor is currently inside (`current_building_id`). Scanning IN at a building "checks in" the pass; the visitor must scan OUT of that building before they're allowed to scan IN anywhere else (`BLOCKED` result if they try).
+- **Visitor photo capture** — a webcam snapshot can be captured at registration time and stored per-pass (`photo_path`), and is returned by the scanner endpoint for the guard to visually confirm identity.
+- **ID type + reference tracking** — each registration records the visitor's ID type and reference number, not just their name.
+- **Guard scanning terminal** — a live scanner page where a guard selects their building and scans a visitor's QR (webcam, USB scanner, or manual token paste) to get an instant AUTHORIZED/UNAUTHORIZED decision.
+- **Pass registry** — view all passes, register a visitor to an available pass, edit authorized buildings on a Multi pass, unassign/return a pass to available stock, and view/print an individual pass's QR badge.
+- **Audit log** — searchable, filterable (by result, building, keyword) history of every scan attempt, exportable to CSV, with admin tools to purge logs by date range or purge everything (guarded by a typed confirmation keyword).
 
 ---
 
@@ -33,82 +46,111 @@ This prototype implements the paper's core proposed mechanism: each visitor pass
 
 ### `app/Http/Controllers/`
 
-The "brains" of each feature area. Each controller handles one part of the system:
-
-- **ScannerController** — powers the guard scanning terminal. Receives a scanned QR token + the guard's building, checks the database, decides AUTHORIZED/UNAUTHORIZED/INVALID, and writes the result to the log.
-- **PassController** — handles viewing the pass registry, registering a visitor to an available pass, and generating the printable QR badge view.
-- **LogController** — handles viewing, searching/filtering, and CSV-exporting the audit trail of every scan attempt.
+- **ScannerController** — powers the guard scanning terminal. Looks up the scanned QR token, checks pass status, building authorization, and current in/out state, then decides the result and writes it to the audit log.
+- **PassController** — handles the pass registry: registering single-building and Multi-Building passes, editing a Multi pass's authorized buildings, unassigning a pass, capturing/storing the visitor photo, and rendering the printable QR badge view.
+- **LogController** — handles viewing, searching/filtering, CSV-exporting, and purging (by date range or entirely) the scan-attempt audit trail.
 
 ### `app/Models/`
 
-Represents the database tables as PHP objects, and defines how they relate to each other:
+- **Building** — the seeded HOR buildings, each with a code, name, and color; plus the dedicated `MULTI` building used as the nominal/primary building for Multi-Building passes.
+- **VisitorPass** — an individual pass: visitor info, ID type/reference, status, QR token, current building (for in/out tracking), photo path, and (for Multi passes) a many-to-many link to its authorized buildings.
+- **ScanLog** — a permanent, immutable-by-design record of every scan attempt (a snapshot of the visitor/pass/building at scan time), its result, reason, and direction (in/out).
 
-- **Building** — the 6 HOR buildings (North Wing, South Wing, RVM, North Gate, Main Building, South Wing Annex), each with a color and a printable badge template image.
-- **VisitorPass** — an individual physical pass (5 per building, 30 total), holding the visitor's info, status, and unique QR token.
-- **ScanLog** — a permanent record of every scan attempt, whether it succeeded or was denied, and why.
+### `app/console/commands/`
+
+- **GenerateMultiBuildingPasses** — `php artisan passes:seed-multi {count=5}`, a dev utility that generates sample Multi-Building passes (each randomly authorized for 2–3 buildings) for testing scanner validation logic.
 
 ### `database/migrations/`
 
-Version-controlled instructions for building/changing the database schema over time (creating tables, adding columns). Running `php artisan migrate` applies these in order. This is how the `buildings`, `visitor_passes`, and `scan_logs` tables were created.
+Version-controlled schema changes, applied in order via `php artisan migrate`. Beyond the initial `buildings`, `visitor_passes`, and `scan_logs` tables, later migrations added: building design fields, Multi-Building pivot support, occupancy tracking columns (on both passes and logs), visitor photo storage, and ID type tracking.
 
 ### `database/seeders/`
 
-Scripts that populate the database with starting data instead of you entering it by hand. `DatabaseSeeder.php` auto-creates the 6 buildings (with their colors and badge templates) and generates all 30 passes with their QR tokens. Running `php artisan db:seed` re-applies this safely (it updates existing rows rather than duplicating them).
+`DatabaseSeeder.php` seeds the 6 real buildings (with colors and badge templates) and 5 available passes each with pre-formatted QR tokens (e.g. `HOR-20TH-NW-0001-SEC2026`). Safe to re-run — it updates existing rows rather than duplicating them (`updateOrCreate`).
 
 ### `resources/views/`
 
-All the actual HTML pages (as Blade templates), organized by feature — mirrors the controllers:
+Blade templates, organized by feature:
 
-- `layouts/app.blade.php` — the shared page shell (header, nav bar) every page extends from.
-- `scanner/` — the guard's live scanning terminal page.
-- `passes/` — the pass registry (grid of all 30 passes) and the individual printable QR badge page.
-- `logs/` — the searchable audit log table.
+- `layouts/app.blade.php` — shared page shell (header/nav) every page extends.
+- `scanner/` — the guard's live scanning terminal.
+- `passes/` — the pass registry grid and the individual printable QR badge page.
+- `logs/` — the searchable/exportable audit log table.
 
 ### `public/images/passes/`
 
-Stores the 6 badge template PNGs (one per building, exported from Canva) that get used as the visual background for each printed pass — the QR code and pass number are overlaid on top of these programmatically.
+The badge template PNGs (one per building) used as the printed pass background, with the QR code and pass number overlaid programmatically.
 
-### `public/`
+### `public/css/theme-govt.css`
 
-The actual web-facing entry point of the app (`index.php` lives here) — this is the only folder a browser can reach directly. Anything meant to be publicly accessible (like the badge template images) has to live inside `public/`.
+The custom government/LSB visual theme (colors, status indicators, etc.) used across the Blade views.
 
 ### `routes/web.php`
 
-The map connecting URLs to controller actions — e.g. visiting `/passes` runs `PassController@index`, submitting the scan form calls `ScannerController@scan`. If a page or button doesn't do anything, this file is usually where the wiring is checked first.
+Maps URLs to controller actions — e.g. `/` and `/scan` → `ScannerController`, `/passes*` → `PassController`, `/logs*` → `LogController`. **Note:** none of these routes currently have auth/role middleware applied.
 
-### `config/`
+### `config/`, `.env`
 
-App-wide settings (database connection defaults, app name, timezone, etc.) — rarely needs manual editing since most of it is controlled via `.env`.
-
-### `.env`
-
-Your local environment's secrets/settings — database credentials, app URL, debug mode. Not shared/committed; this is what makes the app connect to _your_ specific MySQL instance.
+Standard Laravel app configuration and local environment secrets (DB credentials, app URL, debug mode). `.env` is not committed; copy `.env.example` and adjust as needed.
 
 ### `storage/`
 
-Laravel's internal working directory — logs (`storage/logs/laravel.log` is the first place to check when something breaks), cached views, and file uploads if the app ever handles those.
-
-### `vendor/`
-
-All third-party PHP packages Laravel and Composer installed (e.g. the framework itself). Auto-generated — never edited by hand, and not something you need to touch.
+Laravel's working directory — application logs (`storage/logs/laravel.log`), cached views, and visitor photo uploads (`storage/app/public/visitor-photos/`).
 
 ---
 
 ## Core Flow (How a Scan Actually Works)
 
-1. A visitor is registered and assigned an available pass under **Passes** → gets a unique QR token like `HOR-20TH-NW-0001-SEC2026`.
-2. Guard opens **Scanner**, selects which building entrance they're stationed at.
-3. Guard scans the visitor's QR (webcam, USB scanner, or manual paste).
-4. `ScannerController@scan` checks: does this token exist? Is the pass active? Does its assigned building match the guard's current station?
-5. Result (AUTHORIZED / UNAUTHORIZED / INVALID / EXPIRED / REVOKED) is shown instantly and written to `scan_logs`.
-6. **Logs** page shows the full history, searchable and exportable to CSV.
+1. A visitor is registered under **Passes** — assigned to an available single-building pass, or issued a new Multi-Building pass authorized for several buildings — optionally capturing a photo.
+2. A guard opens the **Scanner**, selects which building entrance they're stationed at.
+3. The guard scans the visitor's QR code (webcam, USB scanner, or manual token entry).
+4. The scan is checked against the pass's status, its authorized building(s), and where it's currently checked in:
+    - Not found → **INVALID**
+    - `expired` / `revoked` status → **EXPIRED** / **REVOKED**
+    - Not authorized for this building → **UNAUTHORIZED**
+    - Currently checked into a _different_ building → **BLOCKED** (must scan out first)
+    - Otherwise → **AUTHORIZED**, and the visitor is checked **in** (if not currently inside anywhere) or checked **out** (if currently inside this building)
+5. The result, reason, and (if available) the visitor's photo are shown instantly to the guard and written to `scan_logs`.
+6. **Logs** shows the full searchable/filterable history, exportable to CSV, with optional purge tools.
+
+---
+
+## Setup
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+
+# Configure DB_* in .env for MySQL, or leave DB_CONNECTION=sqlite for local/dev
+
+php artisan migrate
+php artisan db:seed
+php artisan storage:link   # needed for visitor photo uploads to be publicly viewable
+
+npm install
+npm run build   # or `npm run dev` while developing
+
+php artisan serve
+```
 
 ## Common Commands
 
-```powershell
-php artisan migrate       # apply database schema changes
-php artisan db:seed       # populate/update buildings + passes
-php artisan optimize:clear # clear cached config/routes/views (fixes weird stale behavior)
-php artisan tinker        # interactive PHP shell to poke at the database directly
-php artisan serve          #see the webpage
+```bash
+php artisan migrate               # apply database schema changes
+php artisan db:seed               # populate/update buildings + passes
+php artisan passes:seed-multi 5   # generate sample Multi-Building passes for testing
+php artisan optimize:clear        # clear cached config/routes/views
+php artisan tinker                # interactive shell to poke at the database directly
+php artisan serve                 # run the app locally
 ```
+
+---
+
+## Status & Limitations
+
+This is a prototype built for an internship program, not a production-ready system:
+
+- **No authentication/authorization** is implemented on any route yet — anyone with network access to the app can register passes, scan, or purge logs.
+- Visitor photos are stored unencrypted on local disk (`storage/app/public`).
+- Intended to run on a trusted local network (e.g. within LSB's own infrastructure), supplementing — not replacing — existing guards and physical passes.
